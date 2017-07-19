@@ -24,7 +24,7 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 
 QMAKE_CXXFLAGS += -std=c++14
 QMAKE_CXXFLAGS_RELEASE += -O3
-QMAKE_CXXFLAGS_DEBUG += -fno-omit-frame-pointer -Wall -Werror -Wextra -ggdb -Wfloat-conversion
+QMAKE_CXXFLAGS_DEBUG += -fno-omit-frame-pointer -Wall -Werror -Wextra -ggdb -Wfloat-conversion -Wold-style-cast
 QMAKE_CXXFLAGS_DEBUG += -fsanitize=undefined,address#,memory,safe-stack
 QMAKE_LFLAGS_DEBUG += -fsanitize=undefined,address#,memory,safe-stack
 QMAKE_CXXFLAGS_DEBUG += -Wno-unused-variable
@@ -37,7 +37,9 @@ SOURCES += \
     Logic/skill_description.cpp \
     Logic/common.cpp \
     Logic/spellslots.cpp \
-    Logic/class.cpp
+    Logic/class.cpp \
+    Logic/dice.cpp \
+    UI/character_selector_widget.cpp
 
 HEADERS += \
         UI/mainwindow.h \
@@ -46,8 +48,11 @@ HEADERS += \
     Logic/skill_description.h \
     Logic/common.h \
     Logic/spellslots.h \
-    Logic/class.h
+    Logic/class.h \
+    Logic/dice.h \
+    UI/character_selector_widget.h
 
 FORMS += \
         UI/mainwindow.ui \
-        UI/character_widget.ui
+        UI/character_widget.ui \
+    UI/character_selector.ui
