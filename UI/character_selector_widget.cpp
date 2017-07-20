@@ -1,9 +1,11 @@
 #include "character_selector_widget.h"
 #include "ui_character_selector.h"
+#include "ui_utility.h"
 
 #include <QCloseEvent>
 #include <QDebug>
 #include <QDir>
+#include <QEvent>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -25,6 +27,17 @@ Character_selector::Character_selector(QWidget *parent)
 	setVisible(true);
 	from_json(auto_save_filepath);
 	update_character_list();
+	ui->character_list->installEventFilter(new ui_utility::Event_filter(this, [this](QObject *, QEvent *event) {
+		if (event->type() == QEvent::KeyPress) {
+			auto key_event = static_cast<QKeyEvent *>(event);
+			if (key_event->key() == Qt::Key::Key_Delete) {
+				for (auto &item : ui->character_list->selectedItems()) {
+					delete item;
+				}
+			}
+		}
+		return false;
+	}));
 }
 
 Character_selector::~Character_selector() {

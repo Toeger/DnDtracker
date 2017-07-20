@@ -39,7 +39,8 @@ SOURCES += \
     Logic/spellslots.cpp \
     Logic/class.cpp \
     Logic/dice.cpp \
-    UI/character_selector_widget.cpp
+    UI/character_selector_widget.cpp \
+    UI/ui_utility.cpp
 
 HEADERS += \
         UI/mainwindow.h \
@@ -50,7 +51,8 @@ HEADERS += \
     Logic/spellslots.h \
     Logic/class.h \
     Logic/dice.h \
-    UI/character_selector_widget.h
+    UI/character_selector_widget.h \
+    UI/ui_utility.h
 
 FORMS += \
         UI/mainwindow.ui \
