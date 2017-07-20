@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="Character_widget" name="widget" native="true"/>
+     <widget class="Character_widget" name="characters_widget" native="true"/>
     </item>
    </layout>
   </widget>

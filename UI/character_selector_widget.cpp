@@ -1,6 +1,22 @@
 #include "character_selector_widget.h"
 #include "ui_character_selector.h"
 
+#include <QCloseEvent>
+#include <QDir>
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QMessageBox>
+
+const auto auto_save_filepath = [] {
+	const auto path = QDir::homePath() + "/.DnDtracker";
+	if (QDir{}.mkpath(path) == false) {
+		return QString{};
+	}
+	return path + "/autosave.json";
+}();
+
 Character_selector::Character_selector(QWidget *parent)
 	: QWidget(parent)
 	, ui(new Ui::Character_selector) {
@@ -10,6 +26,11 @@ Character_selector::Character_selector(QWidget *parent)
 
 Character_selector::~Character_selector() {
 	delete ui;
+}
+
+void Character_selector::closeEvent(QCloseEvent *event) {
+	to_json(auto_save_filepath);
+	event->accept();
 }
 
 void Character_selector::on_add_to_character_list_clicked() {
@@ -57,6 +78,20 @@ void Character_selector::to_ui(const Character &cha) {
 	ui->speed_spinbox->setValue(cha.speed);
 	ui->str_spinbox->setValue(cha.strength);
 	ui->wis_spinbox->setValue(cha.wisdom);
+}
+
+void Character_selector::to_json(const QString &path) {
+	QFile f{auto_save_filepath};
+	if (f.open(QIODevice::WriteOnly) == false) {
+		QMessageBox::critical(this, tr("IO Error"), tr("Failed writing file\n%1\n").arg(path));
+		return;
+	}
+	QJsonArray object;
+	for (const auto &cha : characters) {
+		object.append(cha.to_json());
+	}
+	QJsonDocument doc{object};
+	f.write(doc.toJson());
 }
 
 void Character_selector::on_character_list_currentRowChanged(int currentRow) {

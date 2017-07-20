@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+class QCloseEvent;
+
 namespace Ui {
 	class MainWindow;
 }
@@ -14,6 +16,7 @@ class MainWindow : public QMainWindow
 	public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow();
+	void closeEvent(QCloseEvent *event) override;
 
 	private:
 	Ui::MainWindow *ui;

@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+class QJsonObject;
+
 struct Character {
 	std::string name{};
 	int initiative{};
@@ -17,9 +19,6 @@ struct Character {
 	int current_HP{};
 	int temporary_HP{};
 	int speed{};
-	bool reaction{};
-	std::vector<Skill_description> skills{};
-	std::vector<std::pair<Class, Spellslots>> spellslots{};
 	int proficiency{};
 	int strength{};
 	int dexterity{};
@@ -28,8 +27,14 @@ struct Character {
 	int wisdom{};
 	int charisma{};
 	int passive_perception{};
+	bool reaction{};
+	bool action{};
+	std::vector<Skill_description> skills{};
+	std::vector<std::pair<Class, Spellslots>> spellslots{};
 	//proficiencies for skills and saving throws
 	void roll_initiative();
+	QJsonObject to_json() const;
+	static Character from_json(const QJsonObject &json);
 };
 
 #endif // CHARACTER_H

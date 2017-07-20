@@ -54,9 +54,6 @@ Character_widget::Character_widget(QWidget *parent)
 }
 
 Character_widget::~Character_widget() {
-	if (character_selector_widget != nullptr) {
-		character_selector_widget->close();
-	}
 	delete ui;
 }
 
