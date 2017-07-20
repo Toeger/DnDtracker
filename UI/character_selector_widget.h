@@ -15,7 +15,6 @@ class Character_selector : public QWidget {
 	public:
 	explicit Character_selector(QWidget *parent = 0);
 	~Character_selector();
-	void closeEvent(QCloseEvent *event) override;
 
 	private slots:
 	void on_add_to_character_list_clicked();

@@ -101,5 +101,6 @@ void Character_widget::on_roll_initiative_button_clicked() {
 }
 
 void Character_widget::on_add_character_button_clicked() {
+	character_selector_widget.reset();
 	character_selector_widget = std::make_unique<Character_selector>();
 }

@@ -28,15 +28,15 @@ Character_selector::Character_selector(QWidget *parent)
 }
 
 Character_selector::~Character_selector() {
+	to_json(auto_save_filepath);
 	delete ui;
 }
 
-void Character_selector::closeEvent(QCloseEvent *event) {
-	to_json(auto_save_filepath);
-	event->accept();
-}
-
 void Character_selector::on_add_to_character_list_clicked() {
+	if (ui->name_edit->text().isEmpty()) {
+		QMessageBox::information(this, tr("Unnamed character"), tr("Please enter a name for the new character before adding it to the list."));
+		return;
+	}
 	characters.push_back(from_ui());
 	update_character_list();
 }
@@ -116,5 +116,7 @@ void Character_selector::from_json(const QString &path) {
 }
 
 void Character_selector::on_character_list_currentRowChanged(int currentRow) {
-	to_ui(characters[currentRow]);
+	if (currentRow != -1) {
+		to_ui(characters[currentRow]);
+	}
 }
