@@ -28,6 +28,7 @@ class Character_selector : public QWidget {
 	Character from_ui() const;
 	void to_ui(const Character &cha);
 	void to_json(const QString &path);
+	void from_json(const QString &path);
 };
 
 #endif // CHARACTER_SELECTOR_H

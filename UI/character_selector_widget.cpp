@@ -2,6 +2,7 @@
 #include "ui_character_selector.h"
 
 #include <QCloseEvent>
+#include <QDebug>
 #include <QDir>
 #include <QFile>
 #include <QJsonArray>
@@ -22,6 +23,8 @@ Character_selector::Character_selector(QWidget *parent)
 	, ui(new Ui::Character_selector) {
 	ui->setupUi(this);
 	setVisible(true);
+	from_json(auto_save_filepath);
+	update_character_list();
 }
 
 Character_selector::~Character_selector() {
@@ -81,7 +84,7 @@ void Character_selector::to_ui(const Character &cha) {
 }
 
 void Character_selector::to_json(const QString &path) {
-	QFile f{auto_save_filepath};
+	QFile f{path};
 	if (f.open(QIODevice::WriteOnly) == false) {
 		QMessageBox::critical(this, tr("IO Error"), tr("Failed writing file\n%1\n").arg(path));
 		return;
@@ -92,6 +95,24 @@ void Character_selector::to_json(const QString &path) {
 	}
 	QJsonDocument doc{object};
 	f.write(doc.toJson());
+}
+
+void Character_selector::from_json(const QString &path) {
+	QFile f{path};
+	if (f.open(QIODevice::ReadOnly) == false) {
+		QMessageBox::critical(this, tr("IO Error"), tr("Failed reading file\n%1\n").arg(path));
+		return;
+	}
+	const auto &data = f.readAll();
+	QJsonParseError json_error;
+	const auto &document = QJsonDocument::fromJson(data, &json_error);
+	if (document.isNull()) {
+		qDebug() << json_error.errorString();
+	}
+	const auto &object = document.array();
+	for (const auto &cha : object) {
+		characters.push_back(Character::from_json(cha.toObject()));
+	}
 }
 
 void Character_selector::on_character_list_currentRowChanged(int currentRow) {
