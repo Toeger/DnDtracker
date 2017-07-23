@@ -9,19 +9,26 @@ namespace Ui {
 	class Character_selector;
 }
 
+class Character_widget;
+class QSpinBox;
+
 class Character_selector : public QWidget {
 	Q_OBJECT
 
 	public:
-	explicit Character_selector(QWidget *parent = 0);
+	explicit Character_selector(QWidget *parent = nullptr, Character_widget *target = nullptr);
 	~Character_selector();
 
 	private slots:
 	void on_add_to_character_list_clicked();
 	void on_character_list_currentRowChanged(int currentRow);
+	void on_add_selected_characters_button_clicked();
+	void stat_spinbox_changed(int value);
+	void on_save_character_changes_button_clicked();
 
 	private:
 	Ui::Character_selector *ui;
+	Character_widget *parent{};
 	std::vector<Character> characters;
 	void update_character_list();
 	Character from_ui() const;

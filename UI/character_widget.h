@@ -26,6 +26,7 @@ class Character_widget : public QWidget {
 	std::vector<Character> characters;
 	explicit Character_widget(QWidget *parent = 0);
 	~Character_widget();
+	void add_characters(std::vector<Character> &new_characters);
 
 	public slots:
 	void update_character_data();

@@ -8,7 +8,7 @@
 #include <tuple>
 
 static Character_widget::Table_column table_columns[] = {
-	{"Name", [](const Character &character) { return QString::fromStdString(character.name); }},
+	{"Name", [](const Character &character) { return character.name; }},
 	{"AC", [](const Character &character) { return QString::number(character.AC); }},
 	{"Initiative", [](const Character &character) { return QString::number(character.initiative); }},
 	{"HP",
@@ -57,6 +57,11 @@ Character_widget::~Character_widget() {
 	delete ui;
 }
 
+void Character_widget::add_characters(std::vector<Character> &new_characters) {
+	characters.insert(std::end(characters), std::make_move_iterator(std::begin(new_characters)), std::make_move_iterator(std::end(new_characters)));
+	update_character_data();
+}
+
 void Character_widget::update_character_data() {
 	ui->character_table->clear();
 	ui->character_table->setColumnCount(columns.size());
@@ -78,7 +83,7 @@ void Character_widget::update_character_data() {
 
 void Character_widget::on_test_button_clicked() {
 	static int character_counter{};
-	characters.push_back({"Test name" + std::to_string(character_counter++)});
+	characters.push_back({"Test name" + QString::number(character_counter++)});
 	update_character_data();
 }
 
@@ -102,5 +107,5 @@ void Character_widget::on_roll_initiative_button_clicked() {
 
 void Character_widget::on_add_character_button_clicked() {
 	character_selector_widget.reset();
-	character_selector_widget = std::make_unique<Character_selector>();
+	character_selector_widget = std::make_unique<Character_selector>(nullptr, this);
 }

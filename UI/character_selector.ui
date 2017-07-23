@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>829</width>
-    <height>600</height>
+    <height>771</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,10 @@
      <item>
       <widget class="QListWidget" name="character_list">
        <property name="selectionMode">
-        <enum>QAbstractItemView::MultiSelection</enum>
+        <enum>QAbstractItemView::ExtendedSelection</enum>
+       </property>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
        </property>
       </widget>
      </item>
@@ -54,44 +57,42 @@
        </item>
       </layout>
      </item>
+     <item>
+      <widget class="QPushButton" name="add_selected_characters_button">
+       <property name="text">
+        <string>Add selected Characters</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_3">
      <item>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="4" column="1">
+       <item row="5" column="1">
         <widget class="QSpinBox" name="str_spinbox"/>
        </item>
-       <item row="12" column="0">
-        <widget class="QLabel" name="label_12">
-         <property name="text">
-          <string>PP</string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="0">
+       <item row="7" column="0">
         <widget class="QLabel" name="label_6">
          <property name="text">
           <string>Con</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="0">
+       <item row="22" column="0">
+        <widget class="QLabel" name="label_18">
+         <property name="text">
+          <string>Tag</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
         <widget class="QLabel" name="label_4">
          <property name="text">
           <string>Str</string>
          </property>
         </widget>
-       </item>
-       <item row="11" column="1">
-        <widget class="QSpinBox" name="exp_spinbox"/>
-       </item>
-       <item row="2" column="1">
-        <widget class="QSpinBox" name="hp_spinbox"/>
-       </item>
-       <item row="3" column="1">
-        <widget class="QSpinBox" name="speed_spinbox"/>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_13">
@@ -100,10 +101,7 @@
          </property>
         </widget>
        </item>
-       <item row="10" column="1">
-        <widget class="QSpinBox" name="cr_spinbox"/>
-       </item>
-       <item row="16" column="0">
+       <item row="27" column="0">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -116,33 +114,100 @@
          </property>
         </spacer>
        </item>
-       <item row="15" column="0">
-        <widget class="QLabel" name="label_15">
-         <property name="text">
-          <string>Prof</string>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="1">
+       <item row="9" column="1">
         <widget class="QSpinBox" name="wis_spinbox"/>
        </item>
-       <item row="12" column="1">
-        <widget class="QSpinBox" name="pp_spinbox"/>
-       </item>
-       <item row="13" column="1">
-        <widget class="QSpinBox" name="initmod_spinbox"/>
-       </item>
-       <item row="9" column="1">
+       <item row="10" column="1">
         <widget class="QSpinBox" name="cha_spinbox"/>
        </item>
-       <item row="3" column="0">
+       <item row="21" column="1" colspan="2">
+        <widget class="QComboBox" name="type_selector">
+         <property name="editable">
+          <bool>true</bool>
+         </property>
+         <property name="currentIndex">
+          <number>9</number>
+         </property>
+         <item>
+          <property name="text">
+           <string>Abberation</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Beast</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Celestial</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Construct</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Dragon</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Elemental</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Fey</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Fiend</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Giant</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Humanoid</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Monstrosity</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Ooze</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Plant</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Undead</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="4" column="0">
         <widget class="QLabel" name="label_3">
          <property name="text">
           <string>Speed</string>
          </property>
         </widget>
        </item>
-       <item row="5" column="0">
+       <item row="6" column="0">
         <widget class="QLabel" name="label_5">
          <property name="text">
           <string>Dex</string>
@@ -156,72 +221,778 @@
          </property>
         </widget>
        </item>
-       <item row="11" column="0">
-        <widget class="QLabel" name="label_11">
-         <property name="text">
-          <string>Exp</string>
-         </property>
-        </widget>
+       <item row="8" column="1">
+        <widget class="QSpinBox" name="int_spinbox"/>
        </item>
-       <item row="7" column="0">
+       <item row="8" column="0">
         <widget class="QLabel" name="label_7">
          <property name="text">
           <string>Int</string>
          </property>
         </widget>
        </item>
-       <item row="9" column="0">
+       <item row="7" column="1">
+        <widget class="QSpinBox" name="con_spinbox"/>
+       </item>
+       <item row="10" column="0">
         <widget class="QLabel" name="label_9">
          <property name="text">
           <string>Cha</string>
          </property>
         </widget>
        </item>
-       <item row="7" column="1">
-        <widget class="QSpinBox" name="int_spinbox"/>
-       </item>
-       <item row="6" column="1">
-        <widget class="QSpinBox" name="con_spinbox"/>
-       </item>
-       <item row="1" column="1">
-        <widget class="QSpinBox" name="ac_spinbox"/>
-       </item>
-       <item row="8" column="0">
+       <item row="9" column="0">
         <widget class="QLabel" name="label_8">
          <property name="text">
           <string>Wis</string>
          </property>
         </widget>
        </item>
-       <item row="13" column="0">
-        <widget class="QLabel" name="label_14">
-         <property name="text">
-          <string>Init Mod</string>
-         </property>
-        </widget>
-       </item>
-       <item row="10" column="0">
-        <widget class="QLabel" name="label_10">
-         <property name="text">
-          <string>CR</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1">
+       <item row="6" column="1">
         <widget class="QSpinBox" name="dex_spinbox"/>
        </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="name_edit"/>
-       </item>
-       <item row="2" column="0">
+       <item row="3" column="0">
         <widget class="QLabel" name="label_2">
          <property name="text">
           <string>HP</string>
          </property>
         </widget>
        </item>
-       <item row="15" column="1">
+       <item row="21" column="0">
+        <widget class="QLabel" name="label_17">
+         <property name="text">
+          <string>Type</string>
+         </property>
+        </widget>
+       </item>
+       <item row="23" column="0">
+        <widget class="QLabel" name="label_19">
+         <property name="text">
+          <string>Alignment</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_20">
+         <property name="text">
+          <string>Armor</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1" colspan="2">
+        <widget class="QLineEdit" name="name_edit"/>
+       </item>
+       <item row="1" column="1" colspan="2">
+        <widget class="QSpinBox" name="ac_spinbox"/>
+       </item>
+       <item row="3" column="1" colspan="2">
+        <widget class="QSpinBox" name="hp_spinbox"/>
+       </item>
+       <item row="4" column="1" colspan="2">
+        <widget class="QSpinBox" name="speed_spinbox"/>
+       </item>
+       <item row="22" column="1" colspan="2">
+        <widget class="QComboBox" name="tag_selector">
+         <property name="editable">
+          <bool>true</bool>
+         </property>
+         <property name="currentText">
+          <string>Humanoid</string>
+         </property>
+         <property name="currentIndex">
+          <number>7</number>
+         </property>
+         <item>
+          <property name="text">
+           <string>Demon</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Devil</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Dwarf</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Elf</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Gnoll</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Gnome</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Goblinoid</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Humanoid</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Kobold</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Merfolk</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Orc</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="11" column="1" colspan="2">
+        <widget class="QSpinBox" name="pp_spinbox"/>
+       </item>
+       <item row="2" column="1" colspan="2">
+        <widget class="QComboBox" name="armor_selector">
+         <property name="editable">
+          <bool>true</bool>
+         </property>
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <item>
+          <property name="text">
+           <string>None</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Natural Armor</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Leather Armor</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="25" column="0">
+        <widget class="QLabel" name="label_11">
+         <property name="text">
+          <string>Exp</string>
+         </property>
+        </widget>
+       </item>
+       <item row="12" column="0">
+        <widget class="QLabel" name="label_14">
+         <property name="text">
+          <string>Init Mod</string>
+         </property>
+        </widget>
+       </item>
+       <item row="13" column="1" colspan="2">
+        <widget class="QComboBox" name="size_selector">
+         <property name="editable">
+          <bool>true</bool>
+         </property>
+         <property name="currentIndex">
+          <number>2</number>
+         </property>
+         <item>
+          <property name="text">
+           <string>Tiny</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Small</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Medium</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Large</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Huge</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Gargantuan</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="6" column="2">
+        <widget class="QLineEdit" name="dex_modifier_edit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="23" column="1" colspan="2">
+        <widget class="QComboBox" name="alignment_selector">
+         <property name="editable">
+          <bool>true</bool>
+         </property>
+         <property name="currentIndex">
+          <number>9</number>
+         </property>
+         <item>
+          <property name="text">
+           <string>CE</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>CG</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>CN</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>LE</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>LG</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>LN</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>NE</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>NG</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>N</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>unaligned</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="11" column="0">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>PP</string>
+         </property>
+        </widget>
+       </item>
+       <item row="13" column="0">
+        <widget class="QLabel" name="label_16">
+         <property name="text">
+          <string>Size</string>
+         </property>
+        </widget>
+       </item>
+       <item row="26" column="1" colspan="2">
         <widget class="QSpinBox" name="proficiency_spinbox"/>
+       </item>
+       <item row="25" column="1" colspan="2">
+        <widget class="QComboBox" name="exp_selector">
+         <property name="editable">
+          <bool>true</bool>
+         </property>
+         <property name="currentText">
+          <string notr="true">0</string>
+         </property>
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <item>
+          <property name="text">
+           <string>0</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>10</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>25</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>50</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>100</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>200</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>450</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>700</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1100</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1800</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>2300</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>2900</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>3900</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>5000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>5900</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>7200</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>8400</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>10000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>11500</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>13000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>15000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>18000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>20000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>22000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>25000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>33000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>41000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>50000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>62000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>75000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>90000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>105000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>120000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>135000</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>155000</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="5" column="2">
+        <widget class="QLineEdit" name="str_modifier_edit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="2">
+        <widget class="QLineEdit" name="int_modifier_edit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="2">
+        <widget class="QLineEdit" name="con_modifier_edit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="12" column="1" colspan="2">
+        <widget class="QSpinBox" name="initmod_spinbox"/>
+       </item>
+       <item row="9" column="2">
+        <widget class="QLineEdit" name="wis_modifier_edit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="2">
+        <widget class="QLineEdit" name="cha_modifier_edit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="26" column="0">
+        <widget class="QLabel" name="label_15">
+         <property name="text">
+          <string>Prof</string>
+         </property>
+        </widget>
+       </item>
+       <item row="24" column="0">
+        <widget class="QLabel" name="label_10">
+         <property name="text">
+          <string>CR</string>
+         </property>
+        </widget>
+       </item>
+       <item row="24" column="1">
+        <widget class="QComboBox" name="cr_selector">
+         <property name="editable">
+          <bool>true</bool>
+         </property>
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <item>
+          <property name="text">
+           <string>0</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1/8</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1/4</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1/2</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>2</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>3</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>4</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>5</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>6</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>7</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>8</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>9</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>10</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>11</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>12</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>13</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>14</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>15</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>16</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>17</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>18</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>19</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>20</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>21</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>22</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>23</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>24</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>25</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>26</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>27</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>28</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>29</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>30</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="24" column="2">
+        <widget class="QPushButton" name="pushButton">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Fill Rest</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
@@ -246,6 +1017,13 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="save_character_changes_button">
+         <property name="text">
+          <string>Save Changes</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
@@ -292,6 +1070,7 @@
   </layout>
  </widget>
  <tabstops>
+  <tabstop>character_list</tabstop>
   <tabstop>import_button</tabstop>
   <tabstop>export_button</tabstop>
   <tabstop>name_edit</tabstop>
@@ -304,12 +1083,13 @@
   <tabstop>int_spinbox</tabstop>
   <tabstop>wis_spinbox</tabstop>
   <tabstop>cha_spinbox</tabstop>
-  <tabstop>cr_spinbox</tabstop>
-  <tabstop>exp_spinbox</tabstop>
-  <tabstop>pp_spinbox</tabstop>
+  <tabstop>type_selector</tabstop>
+  <tabstop>tag_selector</tabstop>
+  <tabstop>alignment_selector</tabstop>
   <tabstop>add_to_character_list</tabstop>
   <tabstop>actions_list</tabstop>
   <tabstop>add_action_button</tabstop>
+  <tabstop>remove_action_button</tabstop>
  </tabstops>
  <resources/>
  <connections/>

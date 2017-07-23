@@ -4,7 +4,7 @@
 #include <QJsonObject>
 
 void Character::roll_initiative() {
-	initiative = Dice::roll_d(20) + (dexterity - 10) / 2 + initiative_modifier;
+	initiative = Dice::roll_d(20) + dexterity / 2 - 5 + initiative_modifier;
 }
 
 QJsonObject Character::to_json() const {
@@ -23,7 +23,14 @@ QJsonObject Character::to_json() const {
 	json["wisdom"] = wisdom;
 	json["charisma"] = charisma;
 	json["passive_perception"] = passive_perception;
-	json["name"] = QString::fromStdString(name);
+	json["name"] = name;
+	json["size"] = size;
+	json["type"] = type;
+	json["tag"] = tag;
+	json["alignment"] = alignment;
+	json["challenge_rating"] = challenge_rating;
+	json["armor"] = armor;
+	json["experience"] = experience;
 	return json;
 }
 
@@ -43,6 +50,13 @@ Character Character::from_json(const QJsonObject &json) {
 	cha.wisdom = json["wisdom"].toInt();
 	cha.charisma = json["charisma"].toInt();
 	cha.passive_perception = json["passive_perception"].toInt();
-	cha.name = json["name"].toString().toStdString();
+	cha.name = json["name"].toString();
+	cha.size = json["size"].toString();
+	cha.type = json["type"].toString();
+	cha.tag = json["tag"].toString();
+	cha.alignment = json["alignment"].toString();
+	cha.challenge_rating = json["challenge_rating"].toString();
+	cha.armor = json["armor"].toString();
+	cha.experience = json["experience"].toInt();
 	return cha;
 }
