@@ -6,7 +6,9 @@
 #include <QCheckBox>
 #include <QCloseEvent>
 #include <QLineEdit>
+#include <QPushButton>
 #include <QSpinBox>
+#include <QTimer>
 #include <memory>
 #include <string>
 #include <tuple>
@@ -43,20 +45,18 @@ Character_widget::Table_column::Table_column(QString header, bool Character::*bo
 		return box;
 	}} {}
 
+Character_widget::Table_column::Table_column(QString header, std::function<std::unique_ptr<QWidget>(Character &)> get_widget)
+	: header{std::move(header)}
+	, get_widget{std::move(get_widget)} {}
+
 static Character_widget::Table_column table_columns[] = {
 	{"Name", &Character::name},
 	{"AC", &Character::AC},
 	{"Initiative", &Character::initiative},
-	/*
-	{"HP",
-	 [](const Character &character) -> Character_widget::Table_column::Table_column_type {
-		 const auto starting_hp = character.get_max_hp();
-		 return QString::number(starting_hp) + "/" + QString::number(starting_hp);
-	 }},
-	*/
+	{"HP", &Character::current_HP},
 	{"Movement", &Character::speed},
 	{"Reaction", &Character::reaction},
-	//{"Concentration", },
+	{"Concentration", &Character::concentration},
 	/*
 	{"Spell Slots",
 	 [](const Character &character) -> Character_widget::Table_column::Table_column_type {
@@ -82,7 +82,19 @@ Character_widget::Character_widget(QWidget *parent)
 	: QWidget{parent}
 	, ui{new Ui::Character_widget} {
 	ui->setupUi(this);
-	columns.insert(std::begin(columns), std::begin(table_columns), std::end(table_columns));
+	columns.push_back({"X", [this](Character &cha) {
+						   auto button = std::make_unique<QPushButton>();
+						   button->setIcon(QIcon::fromTheme("window-close"));
+						   QObject::connect(button.get(), &QPushButton::pressed, [this, &cha]() {
+							   const auto it = std::find_if(std::begin(characters), std::end(characters),
+															[&cha](const std::unique_ptr<Character> &ptr) { return &cha == ptr.get(); });
+							   assert(it != std::end(characters));
+							   characters.erase(it);
+							   QTimer::singleShot(0, this, SLOT(update_character_data()));
+						   });
+						   return button;
+					   }});
+	columns.insert(std::end(columns), std::begin(table_columns), std::end(table_columns));
 	ui->character_table->setSortingEnabled(false);
 }
 
@@ -95,22 +107,6 @@ void Character_widget::add_characters(std::vector<Character> &new_characters) {
 				   [](Character &cha) { return std::make_unique<Character>(std::move(cha)); });
 	update_character_data();
 }
-
-auto get_table_widget(const Character_widget::Table_column::Table_column_type &data) {
-	auto make_line_edit = [](const QString &string) -> std::unique_ptr<QWidget> { return std::make_unique<QLineEdit>(string); };
-	auto make_checkbox = [](bool b) -> std::unique_ptr<QWidget> {
-		auto box = std::make_unique<QCheckBox>();
-		box->setCheckState(b ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
-		return box;
-	};
-	auto make_spinbox = [](int i) -> std::unique_ptr<QWidget> {
-		auto box = std::make_unique<QSpinBox>();
-		box->setValue(i);
-		return box;
-	};
-
-	return boost::apply_visitor(make_overloaded_function(make_line_edit, make_spinbox, make_checkbox), data);
-};
 
 void Character_widget::update_character_data() {
 	ui->character_table->clear();
@@ -141,6 +137,7 @@ void Character_widget::on_next_character_button_clicked() {
 	current_character++;
 	if (static_cast<std::size_t>(current_character) >= characters.size()) {
 		current_character = 0;
+		ui->round_count_spinbox->setValue(ui->round_count_spinbox->value() + 1);
 	}
 	update_character_data();
 }
@@ -153,6 +150,7 @@ void Character_widget::on_roll_initiative_button_clicked() {
 		return std::tie(lhs->initiative, lhs->initiative_modifier) > std::tie(rhs->initiative, rhs->initiative_modifier);
 	});
 	update_character_data();
+	ui->round_count_spinbox->setValue(1);
 }
 
 void Character_widget::on_add_character_button_clicked() {

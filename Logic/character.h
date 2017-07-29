@@ -37,6 +37,7 @@ struct Character {
 	QString alignment{};
 	QString challenge_rating{};
 	QString armor{};
+	QString concentration{};
 	std::vector<Skill_description> skills{};
 	std::vector<std::pair<Class, Spellslots>> spellslots{};
 	//proficiencies for skills and saving throws

@@ -76,7 +76,6 @@ Character Character_selector_widget::from_ui() const {
 	cha.AC = ui->ac_spinbox->value();
 	cha.charisma = ui->cha_spinbox->value();
 	cha.constitution = ui->con_spinbox->value();
-	cha.current_HP = ui->hp_label->text().toInt();
 	cha.dexterity = ui->dex_spinbox->value();
 	cha.initiative_modifier = ui->initmod_spinbox->value();
 	cha.intelligence = ui->int_spinbox->value();
@@ -95,6 +94,7 @@ Character Character_selector_widget::from_ui() const {
 	cha.challenge_rating = ui->cr_selector->currentText();
 	cha.armor = ui->armor_selector->currentText();
 	cha.experience = ui->exp_selector->currentText().toInt();
+	cha.current_HP = cha.get_max_hp();
 	return cha;
 }
 

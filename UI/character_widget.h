@@ -25,6 +25,7 @@ class Character_widget : public QWidget {
 		Table_column(QString header, QString Character::*string);
 		Table_column(QString header, int Character::*number);
 		Table_column(QString header, bool Character::*boolean);
+		Table_column(QString header, std::function<std::unique_ptr<QWidget>(Character &)> get_widget);
 
 		QString header{};
 		std::function<std::unique_ptr<QWidget>(Character &)> get_widget{};
