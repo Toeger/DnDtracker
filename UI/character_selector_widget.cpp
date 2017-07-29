@@ -1,4 +1,5 @@
 #include "character_selector_widget.h"
+#include "character_skills_widget.h"
 #include "character_widget.h"
 #include "ui_character_selector.h"
 #include "ui_utility.h"
@@ -23,7 +24,7 @@ const auto auto_save_filepath = [] {
 	return path + "/autosave.json";
 }();
 
-Character_selector::Character_selector(QWidget *parent, Character_widget *target)
+Character_selector_widget::Character_selector_widget(QWidget *parent, Character_widget *target)
 	: QWidget(parent)
 	, ui(new Ui::Character_selector)
 	, parent(target) {
@@ -44,17 +45,17 @@ Character_selector::Character_selector(QWidget *parent, Character_widget *target
 		return false;
 	}));
 
-	for (auto spinbox : {ui->str_spinbox, ui->dex_spinbox, ui->con_spinbox, ui->int_spinbox, ui->wis_spinbox, ui->cha_spinbox}) {
-		connect(spinbox, qOverload<int>(&QSpinBox::valueChanged), this, &Character_selector::stat_spinbox_changed);
+	for (const auto &spinbox : {ui->str_spinbox, ui->dex_spinbox, ui->con_spinbox, ui->int_spinbox, ui->wis_spinbox, ui->cha_spinbox}) {
+		connect(spinbox, qOverload<int>(&QSpinBox::valueChanged), this, &Character_selector_widget::stat_spinbox_changed);
 	}
 }
 
-Character_selector::~Character_selector() {
+Character_selector_widget::~Character_selector_widget() {
 	to_json(auto_save_filepath);
 	delete ui;
 }
 
-void Character_selector::on_add_to_character_list_clicked() {
+void Character_selector_widget::on_add_to_character_list_clicked() {
 	if (ui->name_edit->text().isEmpty()) {
 		QMessageBox::information(this, tr("Unnamed character"), tr("Please enter a name for the new character before adding it to the list."));
 		return;
@@ -63,23 +64,24 @@ void Character_selector::on_add_to_character_list_clicked() {
 	update_character_list();
 }
 
-void Character_selector::update_character_list() {
+void Character_selector_widget::update_character_list() {
 	ui->character_list->clear();
 	for (const auto &cha : characters) {
 		ui->character_list->addItem(cha.name);
 	}
 }
 
-Character Character_selector::from_ui() const {
+Character Character_selector_widget::from_ui() const {
 	Character cha;
 	cha.AC = ui->ac_spinbox->value();
 	cha.charisma = ui->cha_spinbox->value();
 	cha.constitution = ui->con_spinbox->value();
-	cha.current_HP = ui->hp_spinbox->value();
+	cha.current_HP = ui->hp_label->text().toInt();
 	cha.dexterity = ui->dex_spinbox->value();
 	cha.initiative_modifier = ui->initmod_spinbox->value();
 	cha.intelligence = ui->int_spinbox->value();
-	cha.max_HP = ui->hp_spinbox->value();
+	cha.level = ui->level_selector->value();
+	cha.hit_die = ui->dice_selector->value();
 	cha.name = ui->name_edit->text();
 	cha.passive_perception = ui->pp_spinbox->value();
 	cha.proficiency = ui->proficiency_spinbox->value();
@@ -96,14 +98,15 @@ Character Character_selector::from_ui() const {
 	return cha;
 }
 
-void Character_selector::to_ui(const Character &cha) {
+void Character_selector_widget::to_ui(const Character &cha) {
 	ui->ac_spinbox->setValue(cha.AC);
 	ui->cha_spinbox->setValue(cha.charisma);
 	ui->con_spinbox->setValue(cha.constitution);
 	ui->dex_spinbox->setValue(cha.dexterity);
 	ui->initmod_spinbox->setValue(cha.initiative_modifier);
 	ui->int_spinbox->setValue(cha.intelligence);
-	ui->hp_spinbox->setValue(cha.max_HP);
+	ui->level_selector->setValue(cha.level);
+	ui->dice_selector->setValue(cha.hit_die);
 	ui->name_edit->setText(cha.name);
 	ui->pp_spinbox->setValue(cha.passive_perception);
 	ui->proficiency_spinbox->setValue(cha.proficiency);
@@ -119,7 +122,7 @@ void Character_selector::to_ui(const Character &cha) {
 	ui->exp_selector->setEditText(QString::number(cha.experience));
 };
 
-void Character_selector::to_json(const QString &path) {
+void Character_selector_widget::to_json(const QString &path) {
 	QFile f{path};
 	if (f.open(QIODevice::WriteOnly) == false) {
 		QMessageBox::critical(this, tr("IO Error"), tr("Failed writing file\n%1\n").arg(path));
@@ -133,7 +136,7 @@ void Character_selector::to_json(const QString &path) {
 	f.write(doc.toJson());
 }
 
-void Character_selector::from_json(const QString &path) {
+void Character_selector_widget::from_json(const QString &path) {
 	QFile f{path};
 	if (f.open(QIODevice::ReadOnly) == false) {
 		QMessageBox::critical(this, tr("IO Error"), tr("Failed reading file\n%1\n").arg(path));
@@ -151,13 +154,13 @@ void Character_selector::from_json(const QString &path) {
 	}
 }
 
-void Character_selector::on_character_list_currentRowChanged(int currentRow) {
+void Character_selector_widget::on_character_list_currentRowChanged(int currentRow) {
 	if (currentRow != -1) {
 		to_ui(characters[currentRow]);
 	}
 }
 
-void Character_selector::on_add_selected_characters_button_clicked() {
+void Character_selector_widget::on_add_selected_characters_button_clicked() {
 	if (parent) {
 		std::vector<Character> chars{};
 		const auto &items = ui->character_list->selectedItems();
@@ -169,12 +172,12 @@ void Character_selector::on_add_selected_characters_button_clicked() {
 	}
 }
 
-void Character_selector::stat_spinbox_changed(int value) {
+void Character_selector_widget::stat_spinbox_changed(int value) {
 	struct Spinbox_data {
 		QSpinBox *spinbox;
 		QLineEdit *label;
 		QString text;
-	} spinbox_data[] = {
+	} const spinbox_data[] = {
 		{ui->str_spinbox, ui->str_modifier_edit, tr("Str")}, {ui->dex_spinbox, ui->dex_modifier_edit, tr("Dex")},
 		{ui->con_spinbox, ui->con_modifier_edit, tr("Con")}, {ui->int_spinbox, ui->int_modifier_edit, tr("Int")},
 		{ui->wis_spinbox, ui->wis_modifier_edit, tr("Wis")}, {ui->cha_spinbox, ui->cha_modifier_edit, tr("Cha")},
@@ -198,6 +201,39 @@ void Character_selector::stat_spinbox_changed(int value) {
 	}
 }
 
-void Character_selector::on_save_character_changes_button_clicked() {
+void Character_selector_widget::on_save_character_changes_button_clicked() {
 	characters[ui->character_list->currentRow()] = from_ui();
+}
+
+void Character_selector_widget::on_fill_stats_based_on_challenge_rating_button_clicked() {
+	struct Cr_data {
+		QString text{};
+		int exp{};
+		int proficiency{};
+	} const cr_data[] = {
+		{"0", 10, 2},      {"1/8", 25, 2},    {"1/4", 50, 2},     {"1/2", 100, 2},    {"1", 200, 2},      {"2", 450, 2},      {"3", 700, 2},
+		{"4", 1'100, 2},   {"5", 1'800, 3},   {"6", 2'300, 3},    {"7", 2'900, 3},    {"8", 3'900, 3},    {"9", 5'000, 4},    {"10", 5'900, 4},
+		{"11", 7'200, 4},  {"12", 8'400, 4},  {"13", 10'000, 5},  {"14", 11'500, 5},  {"15", 13'000, 5},  {"16", 15'000, 5},  {"17", 18'000, 6},
+		{"18", 20'000, 6}, {"19", 22'000, 6}, {"20", 25'000, 6},  {"21", 33'000, 7},  {"22", 41'000, 7},  {"23", 50'000, 7},  {"24", 62'000, 7},
+		{"25", 75'000, 8}, {"26", 90'000, 8}, {"27", 105'000, 8}, {"28", 120'000, 8}, {"29", 135'000, 9}, {"30", 155'000, 9},
+	};
+
+	const auto cr = ui->cr_selector->currentText();
+	const auto pos = std::find_if(std::begin(cr_data), std::end(cr_data), [&cr](const Cr_data &rhs) { return cr == rhs.text; });
+	if (pos != std::end(cr_data)) {
+		ui->exp_selector->setEditText(QString::number(pos->exp));
+		ui->proficiency_spinbox->setValue(pos->proficiency);
+	}
+}
+
+void Character_selector_widget::recalculate_hp() {
+	const auto &level = ui->level_selector->value();
+	const auto &hit_die = ui->dice_selector->value();
+	const auto &con = ui->con_spinbox->value();
+	const auto &hp = Character::get_max_hp(level, hit_die, con);
+	ui->hp_label->setText('(' + QString::number(hp) + ')');
+}
+
+void Character_selector_widget::on_skills_edit_button_clicked() {
+	character_skills_widget = std::make_unique<Character_skills_widget>(nullptr, this);
 }

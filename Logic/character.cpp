@@ -11,7 +11,8 @@ QJsonObject Character::to_json() const {
 	QJsonObject json;
 	json["initiative_modifier"] = initiative_modifier;
 	json["AC"] = AC;
-	json["max_HP"] = max_HP;
+	json["level"] = level;
+	json["hit_die"] = hit_die;
 	json["current_HP"] = current_HP;
 	json["temporary_HP"] = temporary_HP;
 	json["speed"] = speed;
@@ -34,11 +35,20 @@ QJsonObject Character::to_json() const {
 	return json;
 }
 
+int Character::get_max_hp() const {
+	return get_max_hp(level, hit_die, constitution);
+}
+
+int Character::get_max_hp(int level, int hit_die, int con) {
+	return level * (hit_die + 1) / 2 + level * (con / 2 - 5);
+}
+
 Character Character::from_json(const QJsonObject &json) {
 	Character cha;
 	cha.initiative_modifier = json["initiative_modifier"].toInt();
 	cha.AC = json["AC"].toInt();
-	cha.max_HP = json["max_HP"].toInt();
+	cha.level = json["level"].toInt();
+	cha.hit_die = json["hit_die"].toInt();
 	cha.current_HP = json["current_HP"].toInt();
 	cha.temporary_HP = json["temporary_HP"].toInt();
 	cha.speed = json["speed"].toInt();

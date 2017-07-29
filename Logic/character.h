@@ -15,7 +15,6 @@ struct Character {
 	int initiative{};
 	int initiative_modifier{};
 	int AC{};
-	int max_HP{};
 	int current_HP{};
 	int temporary_HP{};
 	int speed{};
@@ -28,6 +27,8 @@ struct Character {
 	int charisma{};
 	int passive_perception{};
 	int experience{};
+	int level{};
+	int hit_die{};
 	bool reaction{};
 	bool action{};
 	QString size{};
@@ -41,6 +42,8 @@ struct Character {
 	//proficiencies for skills and saving throws
 	void roll_initiative();
 	QJsonObject to_json() const;
+	int get_max_hp() const;
+	static int get_max_hp(int level, int hit_die, int con);
 	static Character from_json(const QJsonObject &json);
 };
 

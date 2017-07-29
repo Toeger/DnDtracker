@@ -22,7 +22,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-QMAKE_CXXFLAGS += -std=c++14
+QMAKE_CXXFLAGS += -std=c++14 -Wno-c++1z-extensions
 QMAKE_CXXFLAGS_RELEASE += -O3
 QMAKE_CXXFLAGS_DEBUG += -fno-omit-frame-pointer -Wall -Werror -Wextra -ggdb -Wfloat-conversion -Wold-style-cast
 QMAKE_CXXFLAGS_DEBUG += -fsanitize=undefined,address#,memory,safe-stack
@@ -40,7 +40,9 @@ SOURCES += \
     Logic/class.cpp \
     Logic/dice.cpp \
     UI/character_selector_widget.cpp \
-    UI/ui_utility.cpp
+    UI/ui_utility.cpp \
+    UI/character_skills_widget.cpp \
+    Utility/overloaded_function.cpp
 
 HEADERS += \
         UI/mainwindow.h \
@@ -52,9 +54,12 @@ HEADERS += \
     Logic/class.h \
     Logic/dice.h \
     UI/character_selector_widget.h \
-    UI/ui_utility.h
+    UI/ui_utility.h \
+    UI/character_skills_widget.h \
+    Utility/overloaded_function.h
 
 FORMS += \
         UI/mainwindow.ui \
         UI/character_widget.ui \
-    UI/character_selector.ui
+    UI/character_selector.ui \
+    UI/character_skills_widget.ui

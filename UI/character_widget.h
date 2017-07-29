@@ -1,10 +1,11 @@
 #ifndef CHARACTER_WIDGET_H
 #define CHARACTER_WIDGET_H
 
-#include <QWidget>
-#include <vector>
 #include <QString>
+#include <QWidget>
+#include <boost/variant.hpp>
 #include <memory>
+#include <vector>
 
 #include "Logic/character.h"
 
@@ -12,15 +13,16 @@ namespace Ui {
 	class Character_widget;
 }
 
-class Character_selector;
+class Character_selector_widget;
 
 class Character_widget : public QWidget {
 	Q_OBJECT
 
 	public:
 	struct Table_column {
+		using Table_column_type = boost::variant<QString, int, bool>;
 		QString header;
-		QString (*get_content)(const Character &character);
+		Table_column_type (*get_content)(const Character &character);
 	};
 
 	std::vector<Character> characters;
@@ -41,7 +43,7 @@ class Character_widget : public QWidget {
 	Ui::Character_widget *ui{};
 	std::vector<Table_column> columns;
 	int current_character{};
-	std::unique_ptr<Character_selector> character_selector_widget;
+	std::unique_ptr<Character_selector_widget> character_selector_widget;
 };
 
 #endif // CHARACTER_WIDGET_H

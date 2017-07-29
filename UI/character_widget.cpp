@@ -1,45 +1,41 @@
 #include "character_widget.h"
+#include "Utility/overloaded_function.h"
 #include "character_selector_widget.h"
 #include "ui_character_widget.h"
 
+#include <QCheckBox>
 #include <QCloseEvent>
+#include <QLineEdit>
+#include <QSpinBox>
 #include <memory>
 #include <string>
 #include <tuple>
 
 static Character_widget::Table_column table_columns[] = {
-	{"Name", [](const Character &character) { return character.name; }},
-	{"AC", [](const Character &character) { return QString::number(character.AC); }},
-	{"Initiative", [](const Character &character) { return QString::number(character.initiative); }},
+	{"Name", [](const Character &character) -> Character_widget::Table_column::Table_column_type { return character.name; }},
+	{"AC", [](const Character &character) -> Character_widget::Table_column::Table_column_type { return character.AC; }},
+	{"Initiative", [](const Character &character) -> Character_widget::Table_column::Table_column_type { return character.initiative; }},
 	{"HP",
-	 [](const Character &character) {
-		 return QString::number(character.current_HP) + (character.temporary_HP != 0 ? "+" + QString::number(character.temporary_HP) : "") + "/" +
-				QString::number(character.max_HP);
+	 [](const Character &character) -> Character_widget::Table_column::Table_column_type {
+		 const auto starting_hp = character.get_max_hp();
+		 return QString::number(starting_hp) + "/" + QString::number(starting_hp);
 	 }},
-	{"Movement", [](const Character &character) { return QString::number(character.speed); }},
-	{"Reaction",
-	 [](const Character &character) {
-		 (void)character;
-		 return QString{};
-	 }},
-	{"Concentration",
-	 [](const Character &character) {
-		 (void)character;
-		 return QString{};
-	 }},
+	{"Movement", [](const Character &character) -> Character_widget::Table_column::Table_column_type { return character.speed; }},
+	{"Reaction", [](const Character &) -> Character_widget::Table_column::Table_column_type { return true; }},
+	{"Concentration", [](const Character &) -> Character_widget::Table_column::Table_column_type { return false; }},
 	{"Spell Slots",
-	 [](const Character &character) {
+	 [](const Character &character) -> Character_widget::Table_column::Table_column_type {
 		 (void)character;
 		 return QString{};
 	 }},
 	{"Spell DC",
-	 [](const Character &character) {
+	 [](const Character &character) -> Character_widget::Table_column::Table_column_type {
 		 (void)character;
 		 return QString{};
 	 }},
-	{"Passive Perception", [](const Character &character) { return QString{character.passive_perception}; }},
+	{"Passive Perception", [](const Character &character) -> Character_widget::Table_column::Table_column_type { return character.passive_perception; }},
 	{"Stealth",
-	 [](const Character &character) {
+	 [](const Character &character) -> Character_widget::Table_column::Table_column_type {
 		 (void)character;
 		 return QString{};
 	 }},
@@ -62,23 +58,45 @@ void Character_widget::add_characters(std::vector<Character> &new_characters) {
 	update_character_data();
 }
 
+static auto get_table_widget(const Character_widget::Table_column::Table_column_type &data) {
+	auto make_line_edit = [](const QString &string) -> std::unique_ptr<QWidget> { return std::make_unique<QLineEdit>(string); };
+	auto make_checkbox = [](bool b) -> std::unique_ptr<QWidget> {
+		auto box = std::make_unique<QCheckBox>();
+		box->setCheckState(b ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+		return box;
+	};
+	auto make_spinbox = [](int i) -> std::unique_ptr<QWidget> {
+		auto box = std::make_unique<QSpinBox>();
+		box->setValue(i);
+		return box;
+	};
+
+	return boost::apply_visitor(make_overloaded_function(make_line_edit, make_spinbox, make_checkbox), data);
+};
+
 void Character_widget::update_character_data() {
 	ui->character_table->clear();
 	ui->character_table->setColumnCount(columns.size());
 	ui->character_table->setRowCount(0);
+
 	for (int column = 0; static_cast<std::size_t>(column) < columns.size(); column++) {
 		ui->character_table->setHorizontalHeaderItem(column, new QTableWidgetItem(columns[column].header));
 	}
+
 	for (int row = 0; static_cast<std::size_t>(row) < characters.size(); row++) {
 		ui->character_table->insertRow(row);
 		for (int column = 0; static_cast<std::size_t>(column) < columns.size(); column++) {
-			auto item = std::make_unique<QTableWidgetItem>(columns[column].get_content(characters[row]));
-			if (row == current_character) {
-				item->setBackgroundColor(QColor::fromRgb(154, 189, 220));
+			auto item = get_table_widget(columns[column].get_content(characters[row]));
+			if (row == current_character && item != nullptr) {
+				QPalette palette;
+				palette.setColor(QPalette::Base, QColor::fromRgb(154, 189, 220));
+				item->setPalette(palette);
 			}
-			ui->character_table->setItem(row, column, item.release());
+			ui->character_table->setCellWidget(row, column, item.release());
 		}
 	}
+
+	ui->character_table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
 }
 
 void Character_widget::on_test_button_clicked() {
@@ -107,5 +125,5 @@ void Character_widget::on_roll_initiative_button_clicked() {
 
 void Character_widget::on_add_character_button_clicked() {
 	character_selector_widget.reset();
-	character_selector_widget = std::make_unique<Character_selector>(nullptr, this);
+	character_selector_widget = std::make_unique<Character_selector_widget>(nullptr, this);
 }

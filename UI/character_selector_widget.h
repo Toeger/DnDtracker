@@ -4,20 +4,22 @@
 #include "Logic/character.h"
 
 #include <QWidget>
+#include <memory>
 
 namespace Ui {
 	class Character_selector;
 }
 
 class Character_widget;
+class Character_skills_widget;
 class QSpinBox;
 
-class Character_selector : public QWidget {
+class Character_selector_widget : public QWidget {
 	Q_OBJECT
 
 	public:
-	explicit Character_selector(QWidget *parent = nullptr, Character_widget *target = nullptr);
-	~Character_selector();
+	explicit Character_selector_widget(QWidget *parent = nullptr, Character_widget *target = nullptr);
+	~Character_selector_widget();
 
 	private slots:
 	void on_add_to_character_list_clicked();
@@ -25,6 +27,9 @@ class Character_selector : public QWidget {
 	void on_add_selected_characters_button_clicked();
 	void stat_spinbox_changed(int value);
 	void on_save_character_changes_button_clicked();
+	void on_fill_stats_based_on_challenge_rating_button_clicked();
+	void recalculate_hp();
+	void on_skills_edit_button_clicked();
 
 	private:
 	Ui::Character_selector *ui;
@@ -35,6 +40,7 @@ class Character_selector : public QWidget {
 	void to_ui(const Character &cha);
 	void to_json(const QString &path);
 	void from_json(const QString &path);
+	std::unique_ptr<Character_skills_widget> character_skills_widget;
 };
 
 #endif // CHARACTER_SELECTOR_H
