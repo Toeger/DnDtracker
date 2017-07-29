@@ -4,6 +4,7 @@
 #include <QString>
 #include <QWidget>
 #include <boost/variant.hpp>
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -21,11 +22,15 @@ class Character_widget : public QWidget {
 	public:
 	struct Table_column {
 		using Table_column_type = boost::variant<QString, int, bool>;
-		QString header;
-		Table_column_type (*get_content)(const Character &character);
+		Table_column(QString header, QString Character::*string);
+		Table_column(QString header, int Character::*number);
+		Table_column(QString header, bool Character::*boolean);
+
+		QString header{};
+		std::function<std::unique_ptr<QWidget>(Character &)> get_widget{};
 	};
 
-	std::vector<Character> characters;
+	std::vector<std::unique_ptr<Character>> characters;
 	explicit Character_widget(QWidget *parent = 0);
 	~Character_widget();
 	void add_characters(std::vector<Character> &new_characters);
@@ -37,7 +42,6 @@ class Character_widget : public QWidget {
 	void on_next_character_button_clicked();
 	void on_roll_initiative_button_clicked();
 	void on_add_character_button_clicked();
-	void on_test_button_clicked();
 
 	private:
 	Ui::Character_widget *ui{};

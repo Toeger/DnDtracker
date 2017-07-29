@@ -11,34 +11,71 @@
 #include <string>
 #include <tuple>
 
+Character_widget::Table_column::Table_column(QString header, QString Character::*string)
+	: header{std::move(header)}
+	, get_widget{[string](Character &character) -> std::unique_ptr<QWidget> {
+		auto le = std::make_unique<QLineEdit>(character.*string);
+		QObject::connect(le.get(), &QLineEdit::textChanged, [&character, string](const QString &text) { character.*string = text; });
+		return le;
+	}} {}
+
+Character_widget::Table_column::Table_column(QString header, int Character::*number)
+	: header{std::move(header)}
+	, get_widget{[number](Character &character) -> std::unique_ptr<QWidget> {
+		auto box = std::make_unique<QSpinBox>();
+		box->setValue(character.*number);
+		QObject::connect(box.get(), qOverload<int>(&QSpinBox::valueChanged), [&character, number](int value) { character.*number = value; });
+		return box;
+	}} {}
+
+Character_widget::Table_column::Table_column(QString header, bool Character::*boolean)
+	: header{std::move(header)}
+	, get_widget{[boolean](Character &character) -> std::unique_ptr<QWidget> {
+		auto box = std::make_unique<QCheckBox>();
+		box->setCheckState(character.*boolean ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+		QObject::connect(box.get(), &QCheckBox::stateChanged, [&character, boolean](int state) {
+			if (state == Qt::CheckState::Checked) {
+				character.*boolean = true;
+			} else if (state == Qt::CheckState::Unchecked) {
+				character.*boolean = false;
+			}
+		});
+		return box;
+	}} {}
+
 static Character_widget::Table_column table_columns[] = {
-	{"Name", [](const Character &character) -> Character_widget::Table_column::Table_column_type { return character.name; }},
-	{"AC", [](const Character &character) -> Character_widget::Table_column::Table_column_type { return character.AC; }},
-	{"Initiative", [](const Character &character) -> Character_widget::Table_column::Table_column_type { return character.initiative; }},
+	{"Name", &Character::name},
+	{"AC", &Character::AC},
+	{"Initiative", &Character::initiative},
+	/*
 	{"HP",
 	 [](const Character &character) -> Character_widget::Table_column::Table_column_type {
 		 const auto starting_hp = character.get_max_hp();
 		 return QString::number(starting_hp) + "/" + QString::number(starting_hp);
 	 }},
-	{"Movement", [](const Character &character) -> Character_widget::Table_column::Table_column_type { return character.speed; }},
-	{"Reaction", [](const Character &) -> Character_widget::Table_column::Table_column_type { return true; }},
-	{"Concentration", [](const Character &) -> Character_widget::Table_column::Table_column_type { return false; }},
+	*/
+	{"Movement", &Character::speed},
+	{"Reaction", &Character::reaction},
+	//{"Concentration", },
+	/*
 	{"Spell Slots",
 	 [](const Character &character) -> Character_widget::Table_column::Table_column_type {
 		 (void)character;
 		 return QString{};
-	 }},
+	 }},*/
+	/*
 	{"Spell DC",
 	 [](const Character &character) -> Character_widget::Table_column::Table_column_type {
 		 (void)character;
 		 return QString{};
-	 }},
-	{"Passive Perception", [](const Character &character) -> Character_widget::Table_column::Table_column_type { return character.passive_perception; }},
+	 }},*/
+	{"Passive Perception", &Character::passive_perception},
+	/*
 	{"Stealth",
 	 [](const Character &character) -> Character_widget::Table_column::Table_column_type {
 		 (void)character;
 		 return QString{};
-	 }},
+	 }},*/
 };
 
 Character_widget::Character_widget(QWidget *parent)
@@ -54,11 +91,12 @@ Character_widget::~Character_widget() {
 }
 
 void Character_widget::add_characters(std::vector<Character> &new_characters) {
-	characters.insert(std::end(characters), std::make_move_iterator(std::begin(new_characters)), std::make_move_iterator(std::end(new_characters)));
+	std::transform(std::begin(new_characters), std::end(new_characters), std::back_inserter(characters),
+				   [](Character &cha) { return std::make_unique<Character>(std::move(cha)); });
 	update_character_data();
 }
 
-static auto get_table_widget(const Character_widget::Table_column::Table_column_type &data) {
+auto get_table_widget(const Character_widget::Table_column::Table_column_type &data) {
 	auto make_line_edit = [](const QString &string) -> std::unique_ptr<QWidget> { return std::make_unique<QLineEdit>(string); };
 	auto make_checkbox = [](bool b) -> std::unique_ptr<QWidget> {
 		auto box = std::make_unique<QCheckBox>();
@@ -86,7 +124,7 @@ void Character_widget::update_character_data() {
 	for (int row = 0; static_cast<std::size_t>(row) < characters.size(); row++) {
 		ui->character_table->insertRow(row);
 		for (int column = 0; static_cast<std::size_t>(column) < columns.size(); column++) {
-			auto item = get_table_widget(columns[column].get_content(characters[row]));
+			auto item = columns[column].get_widget(*characters[row]);
 			if (row == current_character && item != nullptr) {
 				QPalette palette;
 				palette.setColor(QPalette::Base, QColor::fromRgb(154, 189, 220));
@@ -99,12 +137,6 @@ void Character_widget::update_character_data() {
 	ui->character_table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
 }
 
-void Character_widget::on_test_button_clicked() {
-	static int character_counter{};
-	characters.push_back({"Test name" + QString::number(character_counter++)});
-	update_character_data();
-}
-
 void Character_widget::on_next_character_button_clicked() {
 	current_character++;
 	if (static_cast<std::size_t>(current_character) >= characters.size()) {
@@ -115,10 +147,10 @@ void Character_widget::on_next_character_button_clicked() {
 
 void Character_widget::on_roll_initiative_button_clicked() {
 	for (auto &character : characters) {
-		character.roll_initiative();
+		character->roll_initiative();
 	}
-	std::sort(std::begin(characters), std::end(characters), [](const Character &lhs, const Character &rhs) {
-		return std::tie(lhs.initiative, lhs.initiative_modifier) > std::tie(rhs.initiative, rhs.initiative_modifier);
+	std::sort(std::begin(characters), std::end(characters), [](const std::unique_ptr<Character> &lhs, const std::unique_ptr<Character> &rhs) {
+		return std::tie(lhs->initiative, lhs->initiative_modifier) > std::tie(rhs->initiative, rhs->initiative_modifier);
 	});
 	update_character_data();
 }
