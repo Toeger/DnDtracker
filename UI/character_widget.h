@@ -22,9 +22,9 @@ class Character_widget : public QWidget {
 	public:
 	struct Table_column {
 		using Table_column_type = boost::variant<QString, int, bool>;
-		Table_column(QString header, QString Character::*string);
-		Table_column(QString header, int Character::*number);
-		Table_column(QString header, bool Character::*boolean);
+		Table_column(QString header, QString Character::*string, std::function<void(Character &cha)> callback = [](Character &) {});
+		Table_column(QString header, int Character::*number, std::function<void(Character &cha)> callback = [](Character &) {});
+		Table_column(QString header, bool Character::*boolean, std::function<void(Character &cha)> callback = [](Character &) {});
 		Table_column(QString header, std::function<std::unique_ptr<QWidget>(Character &)> get_widget);
 
 		QString header{};

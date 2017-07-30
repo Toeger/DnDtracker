@@ -13,37 +13,44 @@
 #include <string>
 #include <tuple>
 
-Character_widget::Table_column::Table_column(QString header, QString Character::*string)
+Character_widget::Table_column::Table_column(QString header, QString Character::*string, std::function<void(Character &cha)> callback)
 	: header{std::move(header)}
-	, get_widget{[string](Character &character) -> std::unique_ptr<QWidget> {
+	, get_widget([ string, callback = std::move(callback) ](Character & character) {
 		auto le = std::make_unique<QLineEdit>(character.*string);
-		QObject::connect(le.get(), &QLineEdit::textChanged, [&character, string](const QString &text) { character.*string = text; });
+		QObject::connect(le.get(), &QLineEdit::textChanged, [&character, string, callback](const QString &text) {
+			character.*string = text;
+			callback(character);
+		});
 		return le;
-	}} {}
+	}) {}
 
-Character_widget::Table_column::Table_column(QString header, int Character::*number)
+Character_widget::Table_column::Table_column(QString header, int Character::*number, std::function<void(Character &cha)> callback)
 	: header{std::move(header)}
-	, get_widget{[number](Character &character) -> std::unique_ptr<QWidget> {
+	, get_widget([ number, callback = std::move(callback) ](Character & character) {
 		auto box = std::make_unique<QSpinBox>();
 		box->setValue(character.*number);
-		QObject::connect(box.get(), qOverload<int>(&QSpinBox::valueChanged), [&character, number](int value) { character.*number = value; });
+		QObject::connect(box.get(), qOverload<int>(&QSpinBox::valueChanged), [&character, number, callback](int value) {
+			character.*number = value;
+			callback(character);
+		});
 		return box;
-	}} {}
+	}) {}
 
-Character_widget::Table_column::Table_column(QString header, bool Character::*boolean)
+Character_widget::Table_column::Table_column(QString header, bool Character::*boolean, std::function<void(Character &cha)> callback)
 	: header{std::move(header)}
-	, get_widget{[boolean](Character &character) -> std::unique_ptr<QWidget> {
+	, get_widget([ boolean, callback = std::move(callback) ](Character & character) {
 		auto box = std::make_unique<QCheckBox>();
 		box->setCheckState(character.*boolean ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
-		QObject::connect(box.get(), &QCheckBox::stateChanged, [&character, boolean](int state) {
+		QObject::connect(box.get(), &QCheckBox::stateChanged, [&character, boolean, callback](int state) {
 			if (state == Qt::CheckState::Checked) {
 				character.*boolean = true;
 			} else if (state == Qt::CheckState::Unchecked) {
 				character.*boolean = false;
 			}
+			callback(character);
 		});
 		return box;
-	}} {}
+	}) {}
 
 Character_widget::Table_column::Table_column(QString header, std::function<std::unique_ptr<QWidget>(Character &)> get_widget)
 	: header{std::move(header)}
