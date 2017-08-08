@@ -76,7 +76,7 @@ static const Character_widget::Table_column_data table_columns[] = {
 	{"AC", &Character::AC},
 	{"Initiative", &Character::initiative},
 	{"HP", &Character::current_HP},
-	{"Movement", &Character::speed},
+	{"Movement", &Character::ground_speed},
 	{"Reaction", &Character::reaction},
 	{"Concentration", &Character::concentration},
 	/*

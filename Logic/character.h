@@ -17,7 +17,10 @@ struct Character {
 	int AC{};
 	int current_HP{};
 	int temporary_HP{};
-	int speed{};
+	int ground_speed{};
+	int swim_speed{};
+	int fly_speed{};
+	int other_speed{};
 	int proficiency{};
 	int strength{};
 	int dexterity{};

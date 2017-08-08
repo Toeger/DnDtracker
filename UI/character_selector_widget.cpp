@@ -84,7 +84,10 @@ Character Character_selector_widget::from_ui() const {
 	cha.name = ui->name_edit->text();
 	cha.passive_perception = ui->pp_spinbox->value();
 	cha.proficiency = ui->proficiency_spinbox->value();
-	cha.speed = ui->speed_spinbox->value();
+	cha.ground_speed = ui->ground_speed_spinbox->value();
+	cha.swim_speed = ui->swim_speed_spinbox->value();
+	cha.fly_speed = ui->fly_speed_spinbox->value();
+	cha.other_speed = ui->other_speed_spinbox->value();
 	cha.strength = ui->str_spinbox->value();
 	cha.wisdom = ui->wis_spinbox->value();
 	cha.size = ui->size_selector->currentText();
@@ -110,7 +113,10 @@ void Character_selector_widget::to_ui(const Character &cha) {
 	ui->name_edit->setText(cha.name);
 	ui->pp_spinbox->setValue(cha.passive_perception);
 	ui->proficiency_spinbox->setValue(cha.proficiency);
-	ui->speed_spinbox->setValue(cha.speed);
+	ui->ground_speed_spinbox->setValue(cha.ground_speed);
+	ui->swim_speed_spinbox->setValue(cha.swim_speed);
+	ui->fly_speed_spinbox->setValue(cha.fly_speed);
+	ui->other_speed_spinbox->setValue(cha.other_speed);
 	ui->str_spinbox->setValue(cha.strength);
 	ui->wis_spinbox->setValue(cha.wisdom);
 	ui->size_selector->setCurrentText(cha.size);

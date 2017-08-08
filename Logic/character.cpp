@@ -15,7 +15,10 @@ QJsonObject Character::to_json() const {
 	json["hit_die"] = hit_die;
 	json["current_HP"] = current_HP;
 	json["temporary_HP"] = temporary_HP;
-	json["speed"] = speed;
+	json["ground_speed"] = ground_speed;
+	json["swim_speed"] = swim_speed;
+	json["fly_speed"] = fly_speed;
+	json["other_speed"] = other_speed;
 	json["proficiency"] = proficiency;
 	json["strength"] = strength;
 	json["dexterity"] = dexterity;
@@ -51,7 +54,10 @@ Character Character::from_json(const QJsonObject &json) {
 	cha.hit_die = json["hit_die"].toInt();
 	cha.current_HP = json["current_HP"].toInt();
 	cha.temporary_HP = json["temporary_HP"].toInt();
-	cha.speed = json["speed"].toInt();
+	cha.ground_speed = json["ground_speed"].toInt();
+	cha.swim_speed = json["swim_speed"].toInt();
+	cha.fly_speed = json["fly_speed"].toInt();
+	cha.other_speed = json["other_speed"].toInt();
 	cha.proficiency = json["proficiency"].toInt();
 	cha.strength = json["strength"].toInt();
 	cha.dexterity = json["dexterity"].toInt();
