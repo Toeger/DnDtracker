@@ -1,4 +1,5 @@
 #include "character_selector_widget.h"
+#include "Utility/overloaded_function.h"
 #include "character_skills_widget.h"
 #include "character_widget.h"
 #include "ui_character_selector.h"
@@ -15,6 +16,12 @@
 #include <QMessageBox>
 #include <QSpinBox>
 #include <QtGlobal>
+#include <boost/variant.hpp>
+
+struct Member_ui {
+	boost::variant<int Character::*, QString Character::*> member{};
+	boost::variant<QSpinBox *, QLineEdit *, QComboBox *> ui_element{};
+};
 
 const auto auto_save_filepath = [] {
 	const auto path = QDir::homePath() + "/.DnDtracker";
@@ -73,59 +80,46 @@ void Character_selector_widget::update_character_list() {
 
 Character Character_selector_widget::from_ui() const {
 	Character cha;
-	cha.AC = ui->ac_spinbox->value();
-	cha.charisma = ui->cha_spinbox->value();
-	cha.constitution = ui->con_spinbox->value();
-	cha.dexterity = ui->dex_spinbox->value();
-	cha.initiative_modifier = ui->initmod_spinbox->value();
-	cha.intelligence = ui->int_spinbox->value();
-	cha.level = ui->level_selector->value();
-	cha.hit_die = ui->dice_selector->value();
-	cha.name = ui->name_edit->text();
-	cha.passive_perception = ui->pp_spinbox->value();
-	cha.proficiency = ui->proficiency_spinbox->value();
-	cha.ground_speed = ui->ground_speed_spinbox->value();
-	cha.swim_speed = ui->swim_speed_spinbox->value();
-	cha.fly_speed = ui->fly_speed_spinbox->value();
-	cha.other_speed = ui->other_speed_spinbox->value();
-	cha.strength = ui->str_spinbox->value();
-	cha.wisdom = ui->wis_spinbox->value();
-	cha.size = ui->size_selector->currentText();
-	cha.type = ui->type_selector->currentText();
-	cha.tag = ui->tag_selector->currentText();
-	cha.alignment = ui->alignment_selector->currentText();
-	cha.challenge_rating = ui->cr_selector->currentText();
-	cha.armor = ui->armor_selector->currentText();
-	cha.experience = ui->exp_selector->currentText().toInt();
+	for (const auto &member_ui : get_member_ui_binding()) {
+		boost::apply_visitor(
+			make_overloaded_function(
+				[&member_ui, &cha](int Character::*number) {
+					boost::apply_visitor(make_overloaded_function([number, &cha](QSpinBox *spinbox) { cha.*number = spinbox->value(); },
+																  [number, &cha](QLineEdit *lineedit) { cha.*number = lineedit->text().toInt(); },
+																  [number, &cha](QComboBox *combobox) { cha.*number = combobox->currentText().toInt(); }),
+										 member_ui.ui_element);
+				},
+				[&member_ui, &cha](QString Character::*string) {
+					boost::apply_visitor(make_overloaded_function([string, &cha](QSpinBox *spinbox) { cha.*string = QString::number(spinbox->value()); },
+																  [string, &cha](QLineEdit *lineedit) { cha.*string = lineedit->text(); },
+																  [string, &cha](QComboBox *combobox) { cha.*string = combobox->currentText(); }),
+										 member_ui.ui_element);
+				}),
+			member_ui.member);
+	}
 	cha.current_HP = cha.get_max_hp();
 	return cha;
 }
 
 void Character_selector_widget::to_ui(const Character &cha) {
-	ui->ac_spinbox->setValue(cha.AC);
-	ui->cha_spinbox->setValue(cha.charisma);
-	ui->con_spinbox->setValue(cha.constitution);
-	ui->dex_spinbox->setValue(cha.dexterity);
-	ui->initmod_spinbox->setValue(cha.initiative_modifier);
-	ui->int_spinbox->setValue(cha.intelligence);
-	ui->level_selector->setValue(cha.level);
-	ui->dice_selector->setValue(cha.hit_die);
-	ui->name_edit->setText(cha.name);
-	ui->pp_spinbox->setValue(cha.passive_perception);
-	ui->proficiency_spinbox->setValue(cha.proficiency);
-	ui->ground_speed_spinbox->setValue(cha.ground_speed);
-	ui->swim_speed_spinbox->setValue(cha.swim_speed);
-	ui->fly_speed_spinbox->setValue(cha.fly_speed);
-	ui->other_speed_spinbox->setValue(cha.other_speed);
-	ui->str_spinbox->setValue(cha.strength);
-	ui->wis_spinbox->setValue(cha.wisdom);
-	ui->size_selector->setCurrentText(cha.size);
-	ui->type_selector->setCurrentText(cha.type);
-	ui->tag_selector->setCurrentText(cha.tag);
-	ui->alignment_selector->setCurrentText(cha.alignment);
-	ui->cr_selector->setCurrentText(cha.challenge_rating);
-	ui->armor_selector->setCurrentText(cha.armor);
-	ui->exp_selector->setEditText(QString::number(cha.experience));
+	for (const auto &member_ui : get_member_ui_binding()) {
+		boost::apply_visitor(
+			make_overloaded_function(
+				[&member_ui, &cha](int Character::*number) {
+					boost::apply_visitor(
+						make_overloaded_function([number, &cha](QSpinBox *spinbox) { spinbox->setValue(cha.*number); },
+												 [number, &cha](QLineEdit *lineedit) { lineedit->setText(QString::number(cha.*number)); },
+												 [number, &cha](QComboBox *combobox) { combobox->setCurrentText(QString::number(cha.*number)); }),
+						member_ui.ui_element);
+				},
+				[&member_ui, &cha](QString Character::*string) {
+					boost::apply_visitor(make_overloaded_function([string, &cha](QSpinBox *spinbox) { spinbox->setValue((cha.*string).toInt()); },
+																  [string, &cha](QLineEdit *lineedit) { lineedit->setText(cha.*string); },
+																  [string, &cha](QComboBox *combobox) { combobox->setCurrentText(cha.*string); }),
+										 member_ui.ui_element);
+				}),
+			member_ui.member);
+	}
 };
 
 void Character_selector_widget::to_json(const QString &path) {
@@ -158,6 +152,35 @@ void Character_selector_widget::from_json(const QString &path) {
 	for (const auto &cha : object) {
 		characters.push_back(Character::from_json(cha.toObject()));
 	}
+}
+
+std::vector<Member_ui> Character_selector_widget::get_member_ui_binding() const {
+	return {
+		{&Character::AC, ui->ac_spinbox},
+		{&Character::charisma, ui->cha_spinbox},
+		{&Character::constitution, ui->con_spinbox},
+		{&Character::dexterity, ui->dex_spinbox},
+		{&Character::initiative_modifier, ui->initmod_spinbox},
+		{&Character::intelligence, ui->int_spinbox},
+		{&Character::level, ui->level_selector},
+		{&Character::hit_die, ui->dice_selector},
+		{&Character::name, ui->name_edit},
+		{&Character::passive_perception, ui->pp_spinbox},
+		{&Character::proficiency, ui->proficiency_spinbox},
+		{&Character::ground_speed, ui->ground_speed_spinbox},
+		{&Character::swim_speed, ui->swim_speed_spinbox},
+		{&Character::fly_speed, ui->fly_speed_spinbox},
+		{&Character::other_speed, ui->other_speed_spinbox},
+		{&Character::strength, ui->str_spinbox},
+		{&Character::wisdom, ui->wis_spinbox},
+		{&Character::size, ui->size_selector},
+		{&Character::type, ui->type_selector},
+		{&Character::tag, ui->tag_selector},
+		{&Character::alignment, ui->alignment_selector},
+		{&Character::challenge_rating, ui->cr_selector},
+		{&Character::armor, ui->armor_selector},
+		{&Character::experience, ui->exp_selector},
+	};
 }
 
 void Character_selector_widget::on_character_list_currentRowChanged(int currentRow) {

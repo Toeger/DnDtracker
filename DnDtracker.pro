@@ -43,7 +43,8 @@ SOURCES += \
     UI/ui_utility.cpp \
     UI/character_skills_widget.cpp \
     Utility/overloaded_function.cpp \
-    Utility/unreachable.cpp
+    Utility/unreachable.cpp \
+    Utility/assume.cpp
 
 HEADERS += \
         UI/mainwindow.h \
@@ -58,7 +59,8 @@ HEADERS += \
     UI/ui_utility.h \
     UI/character_skills_widget.h \
     Utility/overloaded_function.h \
-    Utility/unreachable.h
+    Utility/unreachable.h \
+    Utility/assume.h
 
 FORMS += \
         UI/mainwindow.ui \

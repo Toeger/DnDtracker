@@ -3,7 +3,6 @@
 
 #include <QString>
 #include <QWidget>
-#include <boost/variant.hpp>
 #include <functional>
 #include <memory>
 #include <vector>
@@ -20,7 +19,7 @@ class Character_widget : public QWidget {
 	Q_OBJECT
 
 	public:
-	struct Table_column_data{
+	struct Table_column_data {
 		Table_column_data(QString header, QString Character::*string);
 		Table_column_data(QString header, int Character::*number);
 		Table_column_data(QString header, bool Character::*boolean);
@@ -31,7 +30,6 @@ class Character_widget : public QWidget {
 	};
 
 	struct Table_column {
-		using Table_column_type = boost::variant<QString, int, bool>;
 		Table_column(QString header, QString Character::*string);
 		Table_column(QString header, int Character::*number);
 		Table_column(QString header, bool Character::*boolean);

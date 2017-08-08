@@ -5,6 +5,7 @@
 
 #include <QWidget>
 #include <memory>
+#include <vector>
 
 namespace Ui {
 	class Character_selector;
@@ -13,6 +14,7 @@ namespace Ui {
 class Character_widget;
 class Character_skills_widget;
 class QSpinBox;
+struct Member_ui;
 
 class Character_selector_widget : public QWidget {
 	Q_OBJECT
@@ -32,15 +34,17 @@ class Character_selector_widget : public QWidget {
 	void on_skills_edit_button_clicked();
 
 	private:
-	Ui::Character_selector *ui;
+	Ui::Character_selector *ui{};
 	Character_widget *parent{};
-	std::vector<Character> characters;
+	std::vector<Character> characters{};
+	std::unique_ptr<Character_skills_widget> character_skills_widget{};
+
 	void update_character_list();
 	Character from_ui() const;
 	void to_ui(const Character &cha);
 	void to_json(const QString &path);
 	void from_json(const QString &path);
-	std::unique_ptr<Character_skills_widget> character_skills_widget;
+	std::vector<Member_ui> get_member_ui_binding() const;
 };
 
 #endif // CHARACTER_SELECTOR_H

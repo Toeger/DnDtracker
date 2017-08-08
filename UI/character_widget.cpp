@@ -1,4 +1,5 @@
 #include "character_widget.h"
+#include "Utility/assume.h"
 #include "Utility/overloaded_function.h"
 #include "Utility/unreachable.h"
 #include "character_selector_widget.h"
@@ -111,7 +112,7 @@ Character_widget::Character_widget(QWidget *parent)
 						   QObject::connect(button.get(), &QPushButton::pressed, [this, &cha]() {
 							   const auto it = std::find_if(std::begin(characters), std::end(characters),
 															[&cha](const std::unique_ptr<Character> &ptr) { return &cha == ptr.get(); });
-							   assert(it != std::end(characters));
+							   assume(it != std::end(characters));
 							   characters.erase(it);
 							   update_character_data();
 						   });

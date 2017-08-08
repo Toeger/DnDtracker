@@ -9,6 +9,7 @@
 #include <vector>
 
 class QJsonObject;
+struct Member_string;
 
 struct Character {
 	QString name{};
@@ -49,6 +50,9 @@ struct Character {
 	int get_max_hp() const;
 	static int get_max_hp(int level, int hit_die, int con);
 	static Character from_json(const QJsonObject &json);
+
+	private:
+	static std::vector<Member_string> get_member_strings();
 };
 
 #endif // CHARACTER_H
