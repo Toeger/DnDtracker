@@ -1,5 +1,6 @@
 #include "character_widget.h"
 #include "Utility/overloaded_function.h"
+#include "Utility/unreachable.h"
 #include "character_selector_widget.h"
 #include "ui_character_widget.h"
 
@@ -13,41 +14,55 @@
 #include <string>
 #include <tuple>
 
-Character_widget::Table_column::Table_column(QString header, QString Character::*string, std::function<void(Character &cha)> callback)
+Character_widget *Character_widget::Table_column::character_widget{};
+
+Character_widget::Table_column_data::Table_column_data(QString header, QString Character::*string)
 	: header{std::move(header)}
-	, get_widget([ string, callback = std::move(callback) ](Character & character) {
+	, string{string} {}
+
+Character_widget::Table_column_data::Table_column_data(QString header, int Character::*number)
+	: header{std::move(header)}
+	, number{number} {}
+
+Character_widget::Table_column_data::Table_column_data(QString header, bool Character::*boolean)
+	: header{std::move(header)}
+	, boolean{boolean} {}
+
+Character_widget::Table_column::Table_column(QString header, QString Character::*string)
+	: header{std::move(header)}
+	, get_widget([string](Character &character) {
 		auto le = std::make_unique<QLineEdit>(character.*string);
-		QObject::connect(le.get(), &QLineEdit::textChanged, [&character, string, callback](const QString &text) {
+		QObject::connect(le.get(), &QLineEdit::textChanged, [&character, string](const QString &text) {
 			character.*string = text;
-			callback(character);
+			Character_widget::Table_column::character_widget->update_character_data();
 		});
 		return le;
 	}) {}
 
-Character_widget::Table_column::Table_column(QString header, int Character::*number, std::function<void(Character &cha)> callback)
+Character_widget::Table_column::Table_column(QString header, int Character::*number)
 	: header{std::move(header)}
-	, get_widget([ number, callback = std::move(callback) ](Character & character) {
+	, get_widget([number](Character &character) {
 		auto box = std::make_unique<QSpinBox>();
 		box->setValue(character.*number);
-		QObject::connect(box.get(), qOverload<int>(&QSpinBox::valueChanged), [&character, number, callback](int value) {
-			character.*number = value;
-			callback(character);
+		QObject::connect(box.get(), &QSpinBox::editingFinished, [&character, number, spinbox = box.get() ] {
+			character.*number = spinbox->value();
+			Character_widget::Table_column::character_widget->update_character_data();
 		});
 		return box;
 	}) {}
 
-Character_widget::Table_column::Table_column(QString header, bool Character::*boolean, std::function<void(Character &cha)> callback)
+Character_widget::Table_column::Table_column(QString header, bool Character::*boolean)
 	: header{std::move(header)}
-	, get_widget([ boolean, callback = std::move(callback) ](Character & character) {
+	, get_widget([boolean](Character &character) {
 		auto box = std::make_unique<QCheckBox>();
 		box->setCheckState(character.*boolean ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
-		QObject::connect(box.get(), &QCheckBox::stateChanged, [&character, boolean, callback](int state) {
+		QObject::connect(box.get(), &QCheckBox::stateChanged, [&character, boolean](int state) {
 			if (state == Qt::CheckState::Checked) {
 				character.*boolean = true;
 			} else if (state == Qt::CheckState::Unchecked) {
 				character.*boolean = false;
 			}
-			callback(character);
+			Character_widget::Table_column::character_widget->update_character_data();
 		});
 		return box;
 	}) {}
@@ -56,7 +71,7 @@ Character_widget::Table_column::Table_column(QString header, std::function<std::
 	: header{std::move(header)}
 	, get_widget{std::move(get_widget)} {}
 
-static Character_widget::Table_column table_columns[] = {
+static const Character_widget::Table_column_data table_columns[] = {
 	{"Name", &Character::name},
 	{"AC", &Character::AC},
 	{"Initiative", &Character::initiative},
@@ -88,6 +103,7 @@ static Character_widget::Table_column table_columns[] = {
 Character_widget::Character_widget(QWidget *parent)
 	: QWidget{parent}
 	, ui{new Ui::Character_widget} {
+	Character_widget::Table_column::character_widget = this;
 	ui->setupUi(this);
 	columns.push_back({"X", [this](Character &cha) {
 						   auto button = std::make_unique<QPushButton>();
@@ -97,11 +113,20 @@ Character_widget::Character_widget(QWidget *parent)
 															[&cha](const std::unique_ptr<Character> &ptr) { return &cha == ptr.get(); });
 							   assert(it != std::end(characters));
 							   characters.erase(it);
-							   QTimer::singleShot(0, this, SLOT(update_character_data()));
+							   update_character_data();
 						   });
 						   return button;
 					   }});
-	columns.insert(std::end(columns), std::begin(table_columns), std::end(table_columns));
+	std::transform(std::begin(table_columns), std::end(table_columns), std::back_inserter(columns), [](const Character_widget::Table_column_data &tcd) {
+		if (tcd.boolean) {
+			return Character_widget::Table_column{tcd.header, tcd.boolean};
+		} else if (tcd.number) {
+			return Character_widget::Table_column{tcd.header, tcd.number};
+		} else if (tcd.string) {
+			return Character_widget::Table_column{tcd.header, tcd.string};
+		}
+		assume_unreachable();
+	});
 	ui->character_table->setSortingEnabled(false);
 }
 
@@ -119,6 +144,10 @@ void Character_widget::update_character_data() {
 	ui->character_table->clear();
 	ui->character_table->setColumnCount(columns.size());
 	ui->character_table->setRowCount(0);
+
+	std::stable_sort(std::begin(characters), std::end(characters), [](const std::unique_ptr<Character> &lhs, const std::unique_ptr<Character> &rhs) {
+		return std::tie(lhs->initiative, lhs->initiative_modifier) > std::tie(rhs->initiative, rhs->initiative_modifier);
+	});
 
 	for (int column = 0; static_cast<std::size_t>(column) < columns.size(); column++) {
 		ui->character_table->setHorizontalHeaderItem(column, new QTableWidgetItem(columns[column].header));
@@ -153,9 +182,6 @@ void Character_widget::on_roll_initiative_button_clicked() {
 	for (auto &character : characters) {
 		character->roll_initiative();
 	}
-	std::sort(std::begin(characters), std::end(characters), [](const std::unique_ptr<Character> &lhs, const std::unique_ptr<Character> &rhs) {
-		return std::tie(lhs->initiative, lhs->initiative_modifier) > std::tie(rhs->initiative, rhs->initiative_modifier);
-	});
 	update_character_data();
 	ui->round_count_spinbox->setValue(1);
 }

@@ -20,15 +20,26 @@ class Character_widget : public QWidget {
 	Q_OBJECT
 
 	public:
+	struct Table_column_data{
+		Table_column_data(QString header, QString Character::*string);
+		Table_column_data(QString header, int Character::*number);
+		Table_column_data(QString header, bool Character::*boolean);
+		QString header{};
+		QString Character::*string{};
+		int Character::*number{};
+		bool Character::*boolean{};
+	};
+
 	struct Table_column {
 		using Table_column_type = boost::variant<QString, int, bool>;
-		Table_column(QString header, QString Character::*string, std::function<void(Character &cha)> callback = [](Character &) {});
-		Table_column(QString header, int Character::*number, std::function<void(Character &cha)> callback = [](Character &) {});
-		Table_column(QString header, bool Character::*boolean, std::function<void(Character &cha)> callback = [](Character &) {});
+		Table_column(QString header, QString Character::*string);
+		Table_column(QString header, int Character::*number);
+		Table_column(QString header, bool Character::*boolean);
 		Table_column(QString header, std::function<std::unique_ptr<QWidget>(Character &)> get_widget);
 
 		QString header{};
 		std::function<std::unique_ptr<QWidget>(Character &)> get_widget{};
+		static Character_widget *character_widget;
 	};
 
 	std::vector<std::unique_ptr<Character>> characters;

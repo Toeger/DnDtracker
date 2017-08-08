@@ -42,7 +42,8 @@ SOURCES += \
     UI/character_selector_widget.cpp \
     UI/ui_utility.cpp \
     UI/character_skills_widget.cpp \
-    Utility/overloaded_function.cpp
+    Utility/overloaded_function.cpp \
+    Utility/unreachable.cpp
 
 HEADERS += \
         UI/mainwindow.h \
@@ -56,7 +57,8 @@ HEADERS += \
     UI/character_selector_widget.h \
     UI/ui_utility.h \
     UI/character_skills_widget.h \
-    Utility/overloaded_function.h
+    Utility/overloaded_function.h \
+    Utility/unreachable.h
 
 FORMS += \
         UI/mainwindow.ui \
