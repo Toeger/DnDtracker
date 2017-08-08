@@ -40,7 +40,7 @@ int Character::get_max_hp() const {
 }
 
 int Character::get_max_hp(int level, int hit_die, int con) {
-	return level * (hit_die + 1) / 2 + level * (con / 2 - 5);
+	return hit_die + (level - 1) * (hit_die + 1) / 2 + level * (con / 2 - 5);
 }
 
 Character Character::from_json(const QJsonObject &json) {
