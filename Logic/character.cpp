@@ -47,10 +47,10 @@ Character Character::from_json(const QJsonObject &json) {
 
 std::vector<Member_string> Character::get_member_strings() {
 	return {
+		{&Character::name, "name"},
+		{&Character::initiative, "initiative"},
 		{&Character::initiative_modifier, "initiative_modifier"},
 		{&Character::AC, "AC"},
-		{&Character::level, "level"},
-		{&Character::hit_die, "hit_die"},
 		{&Character::current_HP, "current_HP"},
 		{&Character::temporary_HP, "temporary_HP"},
 		{&Character::ground_speed, "ground_speed"},
@@ -65,13 +65,16 @@ std::vector<Member_string> Character::get_member_strings() {
 		{&Character::wisdom, "wisdom"},
 		{&Character::charisma, "charisma"},
 		{&Character::passive_perception, "passive_perception"},
-		{&Character::name, "name"},
+		{&Character::experience, "experience"},
+		{&Character::level, "level"},
+		{&Character::hit_die, "hit_die"},
+		{&Character::reaction, "reaction"},
 		{&Character::size, "size"},
 		{&Character::type, "type"},
 		{&Character::tag, "tag"},
 		{&Character::alignment, "alignment"},
 		{&Character::challenge_rating, "challenge_rating"},
 		{&Character::armor, "armor"},
-		{&Character::experience, "experience"},
+		{&Character::concentration, "concentration"},
 	};
 }

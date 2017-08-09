@@ -7,13 +7,22 @@
 
 #include <QCheckBox>
 #include <QCloseEvent>
+#include <QDebug>
+#include <QDir>
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QSpinBox>
 #include <QTimer>
 #include <memory>
 #include <string>
 #include <tuple>
+
+const static auto current_characters_filepath = "current_characters.json";
 
 Character_widget *Character_widget::Table_column::character_widget{};
 
@@ -33,8 +42,8 @@ Character_widget::Table_column::Table_column(QString header, QString Character::
 	: header{std::move(header)}
 	, get_widget([string](Character &character) {
 		auto le = std::make_unique<QLineEdit>(character.*string);
-		QObject::connect(le.get(), &QLineEdit::textChanged, [&character, string](const QString &text) {
-			character.*string = text;
+		QObject::connect(le.get(), &QLineEdit::editingFinished, [&character, string, lineedit = le.get() ] {
+			character.*string = lineedit->text();
 			Character_widget::Table_column::character_widget->update_character_data();
 		});
 		return le;
@@ -129,6 +138,16 @@ Character_widget::Character_widget(QWidget *parent)
 		assume_unreachable();
 	});
 	ui->character_table->setSortingEnabled(false);
+	{
+		QFile file{current_characters_filepath};
+		if (file.open(QIODevice::ReadOnly)) {
+			for (const auto &object : QJsonDocument::fromJson(file.readAll()).array()) {
+				characters.push_back(std::make_unique<Character>(Character::from_json(object.toObject())));
+			}
+		}
+	}
+	update_character_data();
+	ui->character_table->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
 }
 
 Character_widget::~Character_widget() {
@@ -142,13 +161,21 @@ void Character_widget::add_characters(std::vector<Character> &new_characters) {
 }
 
 void Character_widget::update_character_data() {
+	std::stable_sort(std::begin(characters), std::end(characters),
+					 [](const std::unique_ptr<Character> &lhs, const std::unique_ptr<Character> &rhs) { return lhs->initiative > rhs->initiative; });
+	{
+		QJsonArray array;
+		for (const auto &character : characters) {
+			array += character->to_json();
+		}
+		QFile file{current_characters_filepath};
+		file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+		file.write(QJsonDocument{std::move(array)}.toJson());
+	}
+
 	ui->character_table->clear();
 	ui->character_table->setColumnCount(columns.size());
 	ui->character_table->setRowCount(0);
-
-	std::stable_sort(std::begin(characters), std::end(characters), [](const std::unique_ptr<Character> &lhs, const std::unique_ptr<Character> &rhs) {
-		return std::tie(lhs->initiative, lhs->initiative_modifier) > std::tie(rhs->initiative, rhs->initiative_modifier);
-	});
 
 	for (int column = 0; static_cast<std::size_t>(column) < columns.size(); column++) {
 		ui->character_table->setHorizontalHeaderItem(column, new QTableWidgetItem(columns[column].header));
@@ -166,8 +193,6 @@ void Character_widget::update_character_data() {
 			ui->character_table->setCellWidget(row, column, item.release());
 		}
 	}
-
-	ui->character_table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
 }
 
 void Character_widget::on_next_character_button_clicked() {
@@ -175,6 +200,9 @@ void Character_widget::on_next_character_button_clicked() {
 	if (static_cast<std::size_t>(current_character) >= characters.size()) {
 		current_character = 0;
 		ui->round_count_spinbox->setValue(ui->round_count_spinbox->value() + 1);
+	}
+	if (characters.empty() == false) {
+		characters[current_character]->reaction = true;
 	}
 	update_character_data();
 }
@@ -190,4 +218,8 @@ void Character_widget::on_roll_initiative_button_clicked() {
 void Character_widget::on_add_character_button_clicked() {
 	character_selector_widget.reset();
 	character_selector_widget = std::make_unique<Character_selector_widget>(nullptr, this);
+}
+
+void Character_widget::on_refresh_button_clicked() {
+	update_character_data();
 }

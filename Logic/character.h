@@ -34,7 +34,6 @@ struct Character {
 	int level{};
 	int hit_die{};
 	bool reaction{};
-	bool action{};
 	QString size{};
 	QString type{};
 	QString tag{};

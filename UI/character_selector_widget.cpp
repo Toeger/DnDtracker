@@ -23,13 +23,7 @@ struct Member_ui {
 	boost::variant<QSpinBox *, QLineEdit *, QComboBox *> ui_element{};
 };
 
-const auto auto_save_filepath = [] {
-	const auto path = QDir::homePath() + "/.DnDtracker";
-	if (QDir{}.mkpath(path) == false) {
-		return QString{};
-	}
-	return path + "/autosave.json";
-}();
+const static auto character_file_path = "characters.json";
 
 Character_selector_widget::Character_selector_widget(QWidget *parent, Character_widget *target)
 	: QWidget(parent)
@@ -37,7 +31,7 @@ Character_selector_widget::Character_selector_widget(QWidget *parent, Character_
 	, parent(target) {
 	ui->setupUi(this);
 	setVisible(true);
-	from_json(auto_save_filepath);
+	from_json(character_file_path);
 	update_character_list();
 	ui->character_list->installEventFilter(new ui_utility::Event_filter(this, [this](QObject *, QEvent *event) {
 		if (event->type() == QEvent::KeyPress) {
@@ -58,7 +52,7 @@ Character_selector_widget::Character_selector_widget(QWidget *parent, Character_
 }
 
 Character_selector_widget::~Character_selector_widget() {
-	to_json(auto_save_filepath);
+	to_json(character_file_path);
 	delete ui;
 }
 

@@ -53,6 +53,8 @@ class Character_widget : public QWidget {
 	void on_roll_initiative_button_clicked();
 	void on_add_character_button_clicked();
 
+	void on_refresh_button_clicked();
+
 	private:
 	Ui::Character_widget *ui{};
 	std::vector<Table_column> columns;
