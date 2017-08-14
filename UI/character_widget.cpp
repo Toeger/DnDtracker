@@ -18,70 +18,69 @@
 #include <QPushButton>
 #include <QSpinBox>
 #include <QTimer>
+#include <boost/variant.hpp>
 #include <memory>
 #include <string>
 #include <tuple>
 
 const static auto current_characters_filepath = "current_characters.json";
 
-Character_widget *Character_widget::Table_column::character_widget{};
+struct Table_column_data {
+	QString header{};
+	boost::variant<QString Character::*, int Character::*, bool Character::*> member_pointer{};
+};
 
-Character_widget::Table_column_data::Table_column_data(QString header, QString Character::*string)
-	: header{std::move(header)}
-	, string{string} {}
+struct Table_column {
+	Table_column(QString header, QString Character::*string)
+		: header{std::move(header)}
+		, get_widget([string](Character &character) {
+			auto le = std::make_unique<QLineEdit>(character.*string);
+			QObject::connect(le.get(), &QLineEdit::editingFinished, [&character, string, lineedit = le.get() ] {
+				character.*string = lineedit->text();
+				character_widget->update_character_data();
+			});
+			return le;
+		}) {}
 
-Character_widget::Table_column_data::Table_column_data(QString header, int Character::*number)
-	: header{std::move(header)}
-	, number{number} {}
+	Table_column(QString header, int Character::*number)
+		: header{std::move(header)}
+		, get_widget([number](Character &character) {
+			auto box = std::make_unique<QSpinBox>();
+			box->setValue(character.*number);
+			QObject::connect(box.get(), &QSpinBox::editingFinished, [&character, number, spinbox = box.get() ] {
+				character.*number = spinbox->value();
+				character_widget->update_character_data();
+			});
+			return box;
+		}) {}
 
-Character_widget::Table_column_data::Table_column_data(QString header, bool Character::*boolean)
-	: header{std::move(header)}
-	, boolean{boolean} {}
+	Table_column(QString header, bool Character::*boolean)
+		: header{std::move(header)}
+		, get_widget([boolean](Character &character) {
+			auto box = std::make_unique<QCheckBox>();
+			box->setCheckState(character.*boolean ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+			QObject::connect(box.get(), &QCheckBox::stateChanged, [&character, boolean](int state) {
+				if (state == Qt::CheckState::Checked) {
+					character.*boolean = true;
+				} else if (state == Qt::CheckState::Unchecked) {
+					character.*boolean = false;
+				}
+				character_widget->update_character_data();
+			});
+			return box;
+		}) {}
 
-Character_widget::Table_column::Table_column(QString header, QString Character::*string)
-	: header{std::move(header)}
-	, get_widget([string](Character &character) {
-		auto le = std::make_unique<QLineEdit>(character.*string);
-		QObject::connect(le.get(), &QLineEdit::editingFinished, [&character, string, lineedit = le.get() ] {
-			character.*string = lineedit->text();
-			Character_widget::Table_column::character_widget->update_character_data();
-		});
-		return le;
-	}) {}
+	Table_column(QString header, std::function<std::unique_ptr<QWidget>(Character &)> get_widget)
+		: header{std::move(header)}
+		, get_widget{std::move(get_widget)} {}
 
-Character_widget::Table_column::Table_column(QString header, int Character::*number)
-	: header{std::move(header)}
-	, get_widget([number](Character &character) {
-		auto box = std::make_unique<QSpinBox>();
-		box->setValue(character.*number);
-		QObject::connect(box.get(), &QSpinBox::editingFinished, [&character, number, spinbox = box.get() ] {
-			character.*number = spinbox->value();
-			Character_widget::Table_column::character_widget->update_character_data();
-		});
-		return box;
-	}) {}
+	QString header{};
+	std::function<std::unique_ptr<QWidget>(Character &)> get_widget{};
+	static Character_widget *character_widget;
+};
+Character_widget *Table_column::character_widget{};
 
-Character_widget::Table_column::Table_column(QString header, bool Character::*boolean)
-	: header{std::move(header)}
-	, get_widget([boolean](Character &character) {
-		auto box = std::make_unique<QCheckBox>();
-		box->setCheckState(character.*boolean ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
-		QObject::connect(box.get(), &QCheckBox::stateChanged, [&character, boolean](int state) {
-			if (state == Qt::CheckState::Checked) {
-				character.*boolean = true;
-			} else if (state == Qt::CheckState::Unchecked) {
-				character.*boolean = false;
-			}
-			Character_widget::Table_column::character_widget->update_character_data();
-		});
-		return box;
-	}) {}
-
-Character_widget::Table_column::Table_column(QString header, std::function<std::unique_ptr<QWidget>(Character &)> get_widget)
-	: header{std::move(header)}
-	, get_widget{std::move(get_widget)} {}
-
-static const Character_widget::Table_column_data table_columns[] = {
+static const Table_column_data table_columns[] = {
 	{"Name", &Character::name},
 	{"AC", &Character::AC},
 	{"Initiative", &Character::initiative},
@@ -91,20 +90,20 @@ static const Character_widget::Table_column_data table_columns[] = {
 	{"Concentration", &Character::concentration},
 	/*
 	{"Spell Slots",
-	 [](const Character &character) -> Character_widget::Table_column::Table_column_type {
+	 [](const Character &character) -> Table_column::Table_column_type {
 		 (void)character;
 		 return QString{};
 	 }},*/
 	/*
 	{"Spell DC",
-	 [](const Character &character) -> Character_widget::Table_column::Table_column_type {
+	 [](const Character &character) -> Table_column::Table_column_type {
 		 (void)character;
 		 return QString{};
 	 }},*/
 	{"Passive Perception", &Character::passive_perception},
 	/*
 	{"Stealth",
-	 [](const Character &character) -> Character_widget::Table_column::Table_column_type {
+	 [](const Character &character) -> Table_column::Table_column_type {
 		 (void)character;
 		 return QString{};
 	 }},*/
@@ -113,8 +112,9 @@ static const Character_widget::Table_column_data table_columns[] = {
 Character_widget::Character_widget(QWidget *parent)
 	: QWidget{parent}
 	, ui{new Ui::Character_widget} {
-	Character_widget::Table_column::character_widget = this;
+	Table_column::character_widget = this;
 	ui->setupUi(this);
+	ui->character_table->setSortingEnabled(false);
 	columns.push_back({"X", [this](Character &cha) {
 						   auto button = std::make_unique<QPushButton>();
 						   button->setIcon(QIcon::fromTheme("window-close"));
@@ -127,17 +127,19 @@ Character_widget::Character_widget(QWidget *parent)
 						   });
 						   return button;
 					   }});
-	std::transform(std::begin(table_columns), std::end(table_columns), std::back_inserter(columns), [](const Character_widget::Table_column_data &tcd) {
-		if (tcd.boolean) {
-			return Character_widget::Table_column{tcd.header, tcd.boolean};
-		} else if (tcd.number) {
-			return Character_widget::Table_column{tcd.header, tcd.number};
-		} else if (tcd.string) {
-			return Character_widget::Table_column{tcd.header, tcd.string};
-		}
-		assume_unreachable();
+	std::transform(std::begin(table_columns), std::end(table_columns), std::back_inserter(columns), [](const Table_column_data &tcd) {
+		return boost::apply_visitor(make_overloaded_function(
+										[&header = tcd.header](int Character::*number) {
+											return Table_column{header, number};
+										},
+										[&header = tcd.header](QString Character::*string) {
+											return Table_column{header, string};
+										},
+										[&header = tcd.header](bool Character::*boolean) {
+											return Table_column{header, boolean};
+										}),
+									tcd.member_pointer);
 	});
-	ui->character_table->setSortingEnabled(false);
 	{
 		QFile file{current_characters_filepath};
 		if (file.open(QIODevice::ReadOnly)) {
@@ -147,7 +149,7 @@ Character_widget::Character_widget(QWidget *parent)
 		}
 	}
 	update_character_data();
-	ui->character_table->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+	ui->character_table->horizontalHeader()->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
 }
 
 Character_widget::~Character_widget() {
@@ -185,7 +187,7 @@ void Character_widget::update_character_data() {
 		ui->character_table->insertRow(row);
 		for (int column = 0; static_cast<std::size_t>(column) < columns.size(); column++) {
 			auto item = columns[column].get_widget(*characters[row]);
-			if (row == current_character && item != nullptr) {
+			if (row == current_character_index && item != nullptr) {
 				QPalette palette;
 				palette.setColor(QPalette::Base, QColor::fromRgb(154, 189, 220));
 				item->setPalette(palette);
@@ -196,13 +198,13 @@ void Character_widget::update_character_data() {
 }
 
 void Character_widget::on_next_character_button_clicked() {
-	current_character++;
-	if (static_cast<std::size_t>(current_character) >= characters.size()) {
-		current_character = 0;
+	current_character_index++;
+	if (static_cast<std::size_t>(current_character_index) >= characters.size()) {
+		current_character_index = 0;
 		ui->round_count_spinbox->setValue(ui->round_count_spinbox->value() + 1);
 	}
 	if (characters.empty() == false) {
-		characters[current_character]->reaction = true;
+		characters[current_character_index]->reaction = true;
 	}
 	update_character_data();
 }
